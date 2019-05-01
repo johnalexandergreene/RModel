@@ -11,9 +11,17 @@ public class RModel{
    * ################################
    */
   
-  public RModel(){
-    
-  }
+  public RModel(int width,int height){
+    this.width=width;
+    this.height=height;}
+  
+  /*
+   * ################################
+   * FIELD
+   * ################################
+   */
+  
+  public int width,height;
   
   /*
    * ################################
@@ -75,8 +83,8 @@ public class RModel{
    */
   void conditionallyCreatePhenomena(){
     //TEST
-    if(phenomena.size()<3)
-      phenomena.add(new Phenomenon());
+    if(phenomena.size()<333)
+      phenomena.add(new Phenomenon(this));
     
   }
   

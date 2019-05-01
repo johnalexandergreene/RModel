@@ -1,5 +1,7 @@
 package org.fleen.rModel.test;
 
+import java.io.File;
+
 import org.fleen.rModel.core.RModel;
 import org.fleen.rModel.core.RModelObserver;
 
@@ -12,18 +14,11 @@ public class Test{
    */
   
   Test(){
-    rmodel=new RModel();
+    rmodel=new RModel(SPAN,SPAN);
     rmodel.observers.add(observer);
     ui=new UI(this);
-    renderer=new Renderer(this);}
-  
-  /*
-   * ################################
-   * RMODEL
-   * ################################
-   */
-  
-  RModel rmodel;
+    renderer=new Renderer(this);
+    exporter=new Exporter(this);}
   
   /*
    * ################################
@@ -34,23 +29,29 @@ public class Test{
   RModelObserver observer=new RModelObserver(){
     public void advanced(){
       renderer.render();
-      ui.repaint();}};
-  
-  /*
-   * ################################
-   * UI
-   * ################################
-   */
-  
-  UI ui;
+      ui.repaint();
+      exporter.export();}};
       
   /*
    * ################################
-   * RENDERER
+   * EXPORTDIR
    * ################################
    */
-    
+      
+  static final String EXPORT="/home/john/Desktop/rmodel_export";
+  
+  public File exportdir=new File(EXPORT);
+  
+  /*
+   * ################################
+   * RMODEL, UI, RENDERER AND EXPORTER
+   * ################################
+   */
+  
+  RModel rmodel;
+  UI ui; 
   Renderer renderer;
+  Exporter exporter;
   
   /*
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -62,13 +63,15 @@ public class Test{
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
    */
   
+  public static final int SPAN=400;
+  
   public static final void main(String[] a){
     Test test=new Test();
-    for(int i=0;i<100;i++){
+    for(int i=0;i<500;i++){
       test.rmodel.advanceState();
       System.out.println("RMODEL : "+test.rmodel);
      try{
-      Thread.sleep(1000);
+      Thread.sleep(10);
      }catch(Exception x){};}}
     
 }
