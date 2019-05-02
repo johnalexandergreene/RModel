@@ -48,10 +48,10 @@ public class Renderer{
     g.setPaint(Color.white);
     g.fillRect(0,0,w,h);
     g.setPaint(Color.orange);
-    g.setStroke(new BasicStroke(5.0f));
+    g.setStroke(new BasicStroke(3.0f));
     Ellipse2D.Double e;
     for(Phenomenon p:test.rmodel.phenomena){
-      e=new Ellipse2D.Double(p.x,p.y,p.radius/2,p.radius/2);
+      e=new Ellipse2D.Double(p.center.x,p.center.y,p.radius*2,p.radius*2);
       g.draw(e);}}
 
 }

@@ -81,4 +81,23 @@ Our process would become
 
   1) create random event (at appropriate frequency, form, etc)
   2) goto 1
+  
+###################
+###################
+ALGORITHM FOR A MASS OF CIRCLES
+2 forces at work
+1. a circle is gently drawn to other circles. 
+  Power could be linear. Could be function of distance  
+  Radius of effect is rather large. Like 10Xcircleradius or something
+  
+2. If a circle is too close to another circle then repulsion occurs, 
+  ramping up quickly as the circles get closer 
+  
+So we have 3 radii
+  graphic a
+  bounce  ~a * 0.05
+  gravity ~a * 10 
+ 
+
+
 

@@ -67,11 +67,11 @@ public class Test{
   
   public static final void main(String[] a){
     Test test=new Test();
-    for(int i=0;i<500;i++){
+    for(int i=0;i<2200;i++){
       test.rmodel.advanceState();
       System.out.println("RMODEL : "+test.rmodel);
      try{
-      Thread.sleep(10);
+      Thread.sleep(1);
      }catch(Exception x){};}}
     
 }
