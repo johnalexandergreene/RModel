@@ -1,4 +1,4 @@
-package org.fleen.rModel.test;
+package org.fleen.rModel.test_kgrid_based_circle_arrangement;
 
 import javax.swing.JFrame;
 

@@ -1,9 +1,6 @@
-package org.fleen.rModel.test;
+package org.fleen.rModel.test_freerange_2d_circles;
 
 import java.io.File;
-
-import org.fleen.rModel.core.RModel;
-import org.fleen.rModel.core.RModelObserver;
 
 public class Test{
   

@@ -1,4 +1,4 @@
-package org.fleen.rModel.test;
+package org.fleen.rModel.test_freerange_2d_circles;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
