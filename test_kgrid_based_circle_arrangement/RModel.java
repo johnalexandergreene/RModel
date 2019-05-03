@@ -2,6 +2,7 @@ package org.fleen.rModel.test_kgrid_based_circle_arrangement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /*
  * we are arranging our circles with a KGrid
@@ -27,7 +28,7 @@ public class RModel{
   
   public RModel(){
     addRandomPhenomenon();
-    
+    addRandomPhenomenon();
   }
   
   /*
@@ -96,7 +97,8 @@ public class RModel{
   void addRandomPhenomenon(){
     Phenomenon p=new Phenomenon(this);
     phenomena.add(p);
-    p.hexagon=kghs.createHexagon(2);}
+    int s=new Random().nextInt(3)+1;
+    p.hexagon=kghs.createHexagon(s);}
   
   /*
    * ################################
