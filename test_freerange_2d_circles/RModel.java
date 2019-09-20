@@ -179,17 +179,18 @@ public class RModel{
    * ################################
    */
   
-  static final double MAXVECTORMAGNITUDE=0.1;
-  
   void advancePhysics(){
     doCollisions();
     List<DVector> v=new ArrayList<DVector>();
     for(PCircle p:circles)
       v.add(p.getVector());
     PCircle p;
+    DPoint newpoint;
     for(int i=0;i<circles.size();i++){
       p=circles.get(i);
-      p.center.applyVector(v.get(i));}}
+      newpoint=p.getCenter();
+      newpoint.applyVector(v.get(i));
+      p.addCenter(newpoint);}}
   
   private Set<Collision> collisions;
   
@@ -199,7 +200,7 @@ public class RModel{
     for(PCircle c0:circles){
       for(PCircle c1:circles){
         if(c0!=c1){
-          d=(c0.getRadius()+c1.getRadius())-c0.center.getDistance(c1.center);
+          d=(c0.getRadius()+c1.getRadius())-c0.getCenter().getDistance(c1.getCenter());
           if(d>0)
             collisions.add(new Collision(c0,c1));}}}}
   

@@ -30,7 +30,7 @@ public class Test{
     public void advanced(){
       renderer.render();
       ui.repaint();
-      exporter.export();
+//      exporter.export();
       }};
       
   /*
@@ -39,12 +39,11 @@ public class Test{
    * ################################
    */
       
-  static final String EXPORT="/home/john/Desktop/rmodel_export";
-  
-  public File exportdir=new File(EXPORT);
-  
+  static final String EXPORTDIR="/home/john/Desktop/rmodel_export";
   static final double EXPORTSCALE=1.6;
   static final AffineTransform EXPORTTRANSFORM=AffineTransform.getScaleInstance(EXPORTSCALE,EXPORTSCALE);
+  public File exportdir=new File(EXPORTDIR);
+  Exporter exporter;
   
   public BufferedImage getImageForExport(){
     BufferedImage a=new BufferedImage(
@@ -64,7 +63,6 @@ public class Test{
   RModel rmodel;
   UI ui; 
   Renderer renderer;
-  Exporter exporter;
   
   /*
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

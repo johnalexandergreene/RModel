@@ -1,5 +1,8 @@
 package org.fleen.rModel.test_freerange_2d_circles;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fleen.geom_2D.DPoint;
 import org.fleen.geom_2D.DVector;
 import org.fleen.geom_2D.GD;
@@ -8,7 +11,7 @@ public class PCircle{
   
   public PCircle(RModel rmodel,DPoint center,double radius,double attack,double decay,int lifespan){
     this.rmodel=rmodel;
-    this.center=new DPoint(center);
+    centers.add(new DPoint(center));
     this.maxradius=radius;
     this.attack=attack;
     this.decay=decay;
@@ -31,7 +34,35 @@ public class PCircle{
   
   private double maxradius;
   public int birthday,lifespan;
-  public DPoint center;
+//  public DPoint center;
+  
+  /*
+   * ################################
+   * CENTER
+   * we use the average of a list of centers
+   * a new center added at every iteration of the system
+   * this acts as a shock-absorber, so the circles don't vibrate so much
+   * ################################
+   */
+  
+  static final int CENTERLISTMAXSIZE=22;
+  List<DPoint> centers=new ArrayList<DPoint>(CENTERLISTMAXSIZE+1);
+  
+  public void addCenter(DPoint c){
+    centers.add(c);
+    if(centers.size()>CENTERLISTMAXSIZE)
+      centers.remove(0);}
+  
+  public DPoint getCenter(){
+    DPoint g=GD.getPoint_Mean(centers);
+    return g;}
+  
+  /*
+   * ################################
+   * RADIUS
+   * Dependent on age, attack and decay
+   * ################################
+   */
   
   public double getRadius(){
     double a=getAge();
@@ -51,9 +82,11 @@ public class PCircle{
    * ################################
    */
   
-  DVector vector=new DVector(GD.PI*0.75,0.1);
-  static final double GRAVITYVECTORMAG=5.5;
-  static final double VECTORRETARD=0.05;
+  DVector vector=new DVector(0,0);
+  static final double 
+    GRAVITYVECTORMAG=2.5,
+    VECTORRETARD=0.3,//0.05,
+    COLLISIONMAGFACTOR=0.005;
   
   public DVector getVector(){
     vector.add(getGravityVector());
@@ -62,29 +95,36 @@ public class PCircle{
     vector.magnitude*=VECTORRETARD;
     return vector;}
   
-  static final double COLLISIONMAGFACTOR=0.01;
-  
   private DVector getCollisionVector(){
+    //is there a collision?
     Collision c=rmodel.getCollision(this);
     if(c==null)return null;
+    //specify which circle got collided with
     PCircle other;
     if(c.c0==this)
       other=c.c1;
     else
       other=c.c0;
-    double dir=other.center.getDirection(center);
-    double mag=(other.getRadius()+getRadius())-other.center.getDistance(center)*COLLISIONMAGFACTOR;
-    return new DVector(dir,mag);}
-  
-  
+    //get dir and mag
+    double dir=other.getCenter().getDirection(getCenter());
+    double mag=(other.getRadius()+getRadius())-other.getCenter().getDistance(getCenter())*COLLISIONMAGFACTOR;
+    //scale mag by relative size
+    //in a collision between small and large circles, the small gets pushed harder than the large
+    double relativesizemagfactor=other.getRadius()/getRadius();
+    relativesizemagfactor=Math.sqrt(relativesizemagfactor);//flatten the curve a bit
+    if(relativesizemagfactor>2)relativesizemagfactor=2;
+    if(relativesizemagfactor<0.5)relativesizemagfactor=0.5;
+    mag*=relativesizemagfactor;
+    //
+    DVector v=new DVector(dir,mag);
+    return v;}
   
   private DVector getGravityVector(){
-    double dir=center.getDirection(rmodel.center);
-    return new DVector(dir,GRAVITYVECTORMAG);
-  }
+    double dir=getCenter().getDirection(rmodel.center);
+    return new DVector(dir,GRAVITYVECTORMAG);}
   
   public boolean contains(DPoint p){
-    double a=p.getDistance(center);
+    double a=p.getDistance(getCenter());
     return a<getRadius();}
 
 }

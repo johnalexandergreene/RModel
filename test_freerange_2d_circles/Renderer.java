@@ -8,6 +8,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import org.fleen.geom_2D.DPoint;
+
 public class Renderer{
   
   public static final HashMap<RenderingHints.Key,Object> RENDERING_HINTS=
@@ -49,9 +51,11 @@ public class Renderer{
     g.setStroke(new BasicStroke(3.0f));
     Ellipse2D.Double e;
     double r;
+    DPoint center;
     for(PCircle p:test.rmodel.circles){
       r=p.getRadius();
-      e=new Ellipse2D.Double(p.center.x-r,p.center.y-r,r*2,r*2);
+      center=p.getCenter();
+      e=new Ellipse2D.Double(center.x-r,center.y-r,r*2,r*2);
       g.draw(e);}}
 
 }
