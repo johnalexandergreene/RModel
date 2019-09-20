@@ -27,7 +27,8 @@ public class Test{
     public void advanced(){
       renderer.render();
       ui.repaint();
-      exporter.export();}};
+//      exporter.export();
+      }};
       
   /*
    * ################################
@@ -64,11 +65,11 @@ public class Test{
   
   public static final void main(String[] a){
     Test test=new Test();
-    for(int i=0;i<2200;i++){
+    for(int i=0;i<5500;i++){
       test.rmodel.advanceState();
       System.out.println("RMODEL : "+test.rmodel);
      try{
-      Thread.sleep(1);
+      Thread.sleep(20);
      }catch(Exception x){};}}
     
 }

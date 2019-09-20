@@ -1,10 +1,13 @@
 package org.fleen.rModel.test_freerange_2d_circles;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
+import org.fleen.geom_2D.DPoint;
 import org.fleen.geom_2D.DVector;
-import org.fleen.geom_2D.GD;
 
 public class RModel{
   
@@ -16,16 +19,17 @@ public class RModel{
    * ################################
    */
   
-  public RModel(int width,int height){
+  public RModel(double width,double height){
     this.width=width;
     this.height=height;
+    center=new DPoint(width/2,height/2);
     
   //TEST
     
-    phenomena.add(new Phenomenon(this,120,100,33));
-    phenomena.add(new Phenomenon(this,220,100,55));
-    phenomena.add(new Phenomenon(this,120,300,11));
-    phenomena.add(new Phenomenon(this,220,300,22));
+//    circles.add(new PCircle(this,120,100,33));
+//    circles.add(new PCircle(this,220,100,55));
+//    circles.add(new PCircle(this,120,300,11));
+//    circles.add(new PCircle(this,220,300,22));
     
     }
   
@@ -35,26 +39,28 @@ public class RModel{
    * ################################
    */
   
-  public int width,height;
+  public double width,height;
+  DPoint center;
+  
   
   /*
    * ################################
-   * PHENOMENA
+   * CIRCLES
    * ################################
    */
   
   public int age=0; //the number of times that advanceState has been invoked
-  public List<Phenomenon> phenomena=new ArrayList<Phenomenon>();
+  public List<PCircle> circles=new ArrayList<PCircle>();
   
   public void clear(){
-    phenomena.clear();
+    circles.clear();
     age=0;}
   
   public void advanceState(){
-    removeDeadPhenomena();
-    advancePhenomena();
+    removeDeadCircles();
+    advanceCircles();
     advancePhysics();
-    conditionallyCreatePhenomena();
+    conditionallyCreateCircles();
     age++;
     notifyObservers();}
   
@@ -62,17 +68,19 @@ public class RModel{
    * a phenomenon changed it's state. Growing or shrinking or maintaining or throbbing or something
    * offering data for a circle, it's location and radius. Its color, sound, throbbing frequency...
    */
-  void advancePhenomena(){
-    for(Phenomenon p:phenomena)
+  void advanceCircles(){
+    for(PCircle p:circles)
       p.advance();}
   
-  void removeDeadPhenomena(){
-    List<Phenomenon> toremove=new ArrayList<Phenomenon>();
-    for(Phenomenon p:phenomena)
-      if(p.dead)
+  void removeDeadCircles(){
+    List<PCircle> toremove=new ArrayList<PCircle>();
+    for(PCircle p:circles)
+      if(p.killMe())
         toremove.add(p);
-    phenomena.removeAll(toremove);
+    circles.removeAll(toremove);
     System.out.println("removed "+toremove.size());}
+  
+  static final double BASECIRCLECREATIONPROBABILITY=0.01;
   
   /*
    * create 0..n new phenomenon objects
@@ -85,11 +93,82 @@ public class RModel{
    *   ... etc
    * 
    */
-  void conditionallyCreatePhenomena(){
+  void conditionallyCreateCircles(){
+    if(circles.isEmpty()){
+      createFirstCircle();
+    }else{
+      if(rnd.nextDouble()<BASECIRCLECREATIONPROBABILITY){
+        createCircle();
+      }
+    }
+    
     //TEST
 //    if(phenomena.size()<TESTPCOUNT)
 //      phenomena.add(new Phenomenon(this));
     
+  }
+  
+  Random rnd=new Random();
+  
+  static final double CIRCLEMAXRADIUS=100,CIRCLEMINRADIUS=10;
+  
+  void createCircle(){
+    DPoint p=getRandomFreePoint();
+    if(p==null)return;
+    PCircle c=new PCircle(
+      this,
+      p,
+      getRandomCircleRadius(),
+      getRandomCircleAttack(),
+      getRandomCircleDecay(),
+      getRandomCircleLifespan());
+    circles.add(c);}
+  
+  void createFirstCircle(){
+    PCircle c=new PCircle(
+      this,
+      center,
+      getRandomCircleRadius(),
+      getRandomCircleAttack(),
+      getRandomCircleDecay(),
+      getRandomCircleLifespan());
+    circles.add(c);}
+  
+  static final int CIRCLEMAXLIFESPAN=200,CIRCLEMINLIFESPAN=100;
+  
+  int getRandomCircleLifespan(){
+    int a=rnd.nextInt(CIRCLEMAXLIFESPAN-CIRCLEMINLIFESPAN)+CIRCLEMINLIFESPAN;
+    return a;}
+  
+  static final double CIRCLEATTACKMAX=1,CIRCLEATTACKMIN=0.1;
+  
+  double getRandomCircleAttack(){
+    return rnd.nextDouble()*(CIRCLEATTACKMAX-CIRCLEATTACKMIN)+CIRCLEATTACKMIN;}
+  
+  static final double CIRCLEDECAYMAX=1,CIRCLEDECAYMIN=0.1;
+  
+  double getRandomCircleDecay(){
+    return rnd.nextDouble()*(CIRCLEDECAYMAX-CIRCLEDECAYMIN)+CIRCLEDECAYMIN;}
+  
+  double getRandomCircleRadius(){
+    return rnd.nextDouble()*(CIRCLEMAXRADIUS-CIRCLEMINRADIUS)+CIRCLEMINRADIUS;}
+  
+  static final int MAXFREEPOINTTESTS=100;
+  
+  DPoint getRandomFreePoint(){
+    boolean isfree=false;
+    int testcount=0;
+    DPoint p=null;
+    while(!isfree&&testcount<MAXFREEPOINTTESTS){
+      p=new DPoint(rnd.nextDouble()*width,rnd.nextDouble()*height);
+      isfree=true;
+      SEEK:for(PCircle c:circles){
+        if(c.contains(p)){
+          p=null;
+          isfree=false;
+          break SEEK;}}
+      testcount++;}
+    return p;
   }
   
   /*
@@ -106,88 +185,48 @@ public class RModel{
    * the PRCs gravitate to the center of the clump, thus grouping and packing themselves. 
    * Account for the physics of that too 
    */
+//  void advancePhysics(){
+//    //get raw vectors
+//    List<DVector> gravity=getGravityVectors();
+//    List<DVector> bump=getBumpVectors();
+//    //sum, normalize and apply
+//    PCircle p;
+//    DVector sum;
+//    for(int i=0;i<circles.size();i++){
+//      p=circles.get(i);
+//      sum=new DVector(gravity.get(i),bump.get(i));
+//      if(sum.magnitude>MAXVECTORMAGNITUDE)
+//        sum.magnitude=MAXVECTORMAGNITUDE;
+//      p.center.applyVector(sum);}}
+  
   void advancePhysics(){
-    //get raw vectors
-    List<DVector> gravity=getGravityVectors();
-    List<DVector> bump=getBumpVectors();
-    //sum, normalize and apply
-    Phenomenon p;
-    DVector sum;
-    for(int i=0;i<phenomena.size();i++){
-      p=phenomena.get(i);
-      sum=new DVector(gravity.get(i),bump.get(i));
-      if(sum.magnitude>MAXVECTORMAGNITUDE)
-        sum.magnitude=MAXVECTORMAGNITUDE;
-      p.center.applyVector(sum);}}
+    doCollisions();
+    List<DVector> v=new ArrayList<DVector>();
+    for(PCircle p:circles)
+      v.add(p.getVector());
+    PCircle p;
+    for(int i=0;i<circles.size();i++){
+      p=circles.get(i);
+      p.center.applyVector(v.get(i));}}
   
-  //--------------------------------
+  Set<Collision> collisions;
   
-  List<DVector> getGravityVectors(){
-    List<DVector> gv=new ArrayList<DVector>();
-    for(Phenomenon p:phenomena)
-      gv.add(getGravityVector(p));
-    return gv;}
   
-  static final double GRAVMAGFACTOR=8.0,GRAVMINDIS=199.0;
+  private void doCollisions(){
+    collisions=new HashSet<Collision>();
+    double d;
+    for(PCircle c0:circles){
+      for(PCircle c1:circles){
+        if(c0!=c1){
+          d=(c0.getRadius()+c1.getRadius())-c0.center.getDistance(c1.center);
+          if(d>0)
+            collisions.add(new Collision(c0,c1));}}}}
   
-  DVector getGravityVector(Phenomenon p){
-    //get neighbors
-    List<Phenomenon> neighbors=new ArrayList<Phenomenon>();
-    for(Phenomenon a:phenomena)
-      if(a!=p)neighbors.add(a);
-    //get vectors
-    //get distance and direction to each neighbor. Create attractive vector
-    List<DVector> gvectors=new ArrayList<DVector>();
-    double dir,mag,dis;
-    for(Phenomenon p0:neighbors){
-      dis=p.center.getDistance(p0.center);
-      if(dis<(p.radius+p0.radius+GRAVMINDIS)){
-        dir=p.center.getDirection(p0.center);
-        mag=(1.0/dis)*GRAVMAGFACTOR;
-        gvectors.add(new DVector(dir,mag));}}
-    //sum vectors
-    DVector sum=new DVector(gvectors);
-    //
-    return sum;}
-  
-  //--------------------------------
-  
-  static final double BUMPERTHICKNESS=4.0,BUMPMAGTWEAK=10;
-  
-  List<DVector> getBumpVectors(){
-    List<DVector> bv=new ArrayList<DVector>();
-    for(Phenomenon p:phenomena)
-      bv.add(getBumpVector(p));
-    return bv;}
-  
-  DVector getBumpVector(Phenomenon p){
-    //get neighbors
-    List<Phenomenon> neighbors=new ArrayList<Phenomenon>();
-    for(Phenomenon a:phenomena)
-      if(a!=p)neighbors.add(a);
-    //get vectors
-    //get distance and direction to each neighbor. Create repulsive vector
-    List<DVector> gvectors=new ArrayList<DVector>();
-    double dis,dir,mag,bumpdis;
-    for(Phenomenon p0:neighbors){
-      System.out.println("------------------");
-      System.out.println("p:"+p.center);
-      System.out.println("p0:"+p0.center);
-      System.out.println("p radius :"+p.radius);
-      dis=p.center.getDistance(p0.center);
-      System.out.println("p-p0 dis = "+dis);
-      bumpdis=p.radius+p0.radius+BUMPERTHICKNESS;
-      System.out.println("bumpdis = "+bumpdis);
-      if(dis<bumpdis){
-        dir=p.center.getDirection(p0.center);
-        dir=GD.normalizeDirection(dir+GD.PI);
-        mag=((bumpdis-dis)/bumpdis)*BUMPMAGTWEAK;
-        gvectors.add(new DVector(dir,mag));}}
-    //sum vectors
-    DVector sum=new DVector(gvectors);
-    //
-    System.out.println("bump vector = "+sum);
-    return sum;}
+  public Collision getCollision(PCircle c){
+    for(Collision a:collisions)
+      if(a.c0==c||a.c1==c)
+        return a;
+    return null;}
   
   /*
    * ################################
@@ -209,7 +248,7 @@ public class RModel{
   
   public String toString(){
     StringBuffer a=new StringBuffer("RMODEL");
-    a.append("\n pcount : "+phenomena.size());
+    a.append("\n pcount : "+circles.size());
     a.append("\n age : "+age);
     return a.toString();}
   

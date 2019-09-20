@@ -96,8 +96,17 @@ public class KGridHexagonSystem extends KGrid{
    * return the list of all hexagons that
    *   use the specified kpoint as a corner point
    *   does not use any points (that means its reticulation too) that are inside any extant hexagon
+   *   
+   * ---
+   * Get every point at size+1 intervals from kp
+   * from each of those points create a KGHSHexagon
+   * test each of those hexagons to see if its reticulation contains any of the extant hexagons' internal points
+   * if not then we have a prospect
+   * if no prospects then return empty list 
+   *   
    */
   private List<KGHSHexagon> getProspects(KPoint kp,int size){
+    List<KPoint> hcenters;
     
   }
   

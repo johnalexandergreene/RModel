@@ -37,6 +37,17 @@ the bubbles will be circles. They will grow, shrink... maybe vibrate
 They tend to bump and press on each other, so we have that kind of physics going on.
 
 ################################
+HOW WE'RE GONNA DO IT, 05/31/2019 
+################################
+Verlet physics blobs
+attracted to center of viewport
+growing out of nothing, lingering, vibrating, possibly humming, then dwindling to nothing
+  geometrically : a blob grows from a point, pressing against its neighbors if necessary, stops growing, maintains its size for a while, then shrinks to nothing
+  graphically : some kind of fade-in. Then strobes and stuff.
+
+
+
+################################
 OPTION
 THE DEPTHS OF A PHENOMENON
 ################################
@@ -82,21 +93,6 @@ Our process would become
   1) create random event (at appropriate frequency, form, etc)
   2) goto 1
   
-###################
-###################
-ALGORITHM FOR A MASS OF CIRCLES
-2 forces at work
-1. a circle is gently drawn to other circles. 
-  Power could be linear. Could be function of distance  
-  Radius of effect is rather large. Like 10Xcircleradius or something
-  
-2. If a circle is too close to another circle then repulsion occurs, 
-  ramping up quickly as the circles get closer 
-  
-So we have 3 radii
-  graphic a
-  bounce  ~a * 0.05
-  gravity ~a * 10 
  
 
 

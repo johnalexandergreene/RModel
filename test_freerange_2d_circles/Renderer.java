@@ -38,8 +38,8 @@ public class Renderer{
       
   void render(){
     int 
-      w=test.rmodel.width,
-      h=test.rmodel.height;
+      w=(int)test.rmodel.width,
+      h=(int)test.rmodel.height;
     image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
     Graphics2D g=image.createGraphics();
     g.setRenderingHints(RENDERING_HINTS);
@@ -48,8 +48,10 @@ public class Renderer{
     g.setPaint(Color.orange);
     g.setStroke(new BasicStroke(3.0f));
     Ellipse2D.Double e;
-    for(Phenomenon p:test.rmodel.phenomena){
-      e=new Ellipse2D.Double(p.center.x,p.center.y,p.radius*2,p.radius*2);
+    double r;
+    for(PCircle p:test.rmodel.circles){
+      r=p.getRadius();
+      e=new Ellipse2D.Double(p.center.x-r,p.center.y-r,r*2,r*2);
       g.draw(e);}}
 
 }
