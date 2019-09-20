@@ -26,7 +26,7 @@ public class Exporter{
   
   public void export(){
     File file=getExportFile(test.exportdir,test.rmodel.age);
-    write(test.renderer.image,file);}
+    write(test.getImageForExport(),file);}
   
   private File getExportFile(File exportdir,int index){
     String s = String.format("%1$05d",index);

@@ -12,7 +12,7 @@ public class PCircle{
     this.maxradius=radius;
     this.attack=attack;
     this.decay=decay;
-    this.lifespan=lifespan;
+    this.lifespan=lifespan+(int)(maxradius/attack)+(int)(maxradius/decay);
     birthday=rmodel.age;
   }
   
@@ -22,6 +22,9 @@ public class PCircle{
   public boolean killMe(){
     return getAge()>lifespan;}
   
+  /*
+   * this will advance the graphical representation 1 frame
+   */
   public void advance(){
     
   }

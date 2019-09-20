@@ -80,7 +80,7 @@ public class RModel{
     circles.removeAll(toremove);
     System.out.println("removed "+toremove.size());}
   
-  static final double BASECIRCLECREATIONPROBABILITY=0.01;
+  static final double BASECIRCLECREATIONPROBABILITY=0.1;
   
   /*
    * create 0..n new phenomenon objects
@@ -110,7 +110,7 @@ public class RModel{
   
   Random rnd=new Random();
   
-  static final double CIRCLEMAXRADIUS=100,CIRCLEMINRADIUS=10;
+  static final double CIRCLEMAXRADIUS=70,CIRCLEMINRADIUS=20;
   
   void createCircle(){
     DPoint p=getRandomFreePoint();
@@ -134,18 +134,18 @@ public class RModel{
       getRandomCircleLifespan());
     circles.add(c);}
   
-  static final int CIRCLEMAXLIFESPAN=200,CIRCLEMINLIFESPAN=100;
+  static final int CIRCLEMAXLIFESPAN=100,CIRCLEMINLIFESPAN=20;
   
   int getRandomCircleLifespan(){
     int a=rnd.nextInt(CIRCLEMAXLIFESPAN-CIRCLEMINLIFESPAN)+CIRCLEMINLIFESPAN;
     return a;}
   
-  static final double CIRCLEATTACKMAX=1,CIRCLEATTACKMIN=0.1;
+  static final double CIRCLEATTACKMAX=0.25,CIRCLEATTACKMIN=0.08;
   
   double getRandomCircleAttack(){
     return rnd.nextDouble()*(CIRCLEATTACKMAX-CIRCLEATTACKMIN)+CIRCLEATTACKMIN;}
   
-  static final double CIRCLEDECAYMAX=1,CIRCLEDECAYMIN=0.1;
+  static final double CIRCLEDECAYMAX=0.25,CIRCLEDECAYMIN=0.08;
   
   double getRandomCircleDecay(){
     return rnd.nextDouble()*(CIRCLEDECAYMAX-CIRCLEDECAYMIN)+CIRCLEDECAYMIN;}
@@ -155,7 +155,10 @@ public class RModel{
   
   static final int MAXFREEPOINTTESTS=100;
   
-  DPoint getRandomFreePoint(){
+  /*
+   * TODO the point gotten should be near another circle. Preferable in the crotch between 3 circles. To maintain clumpiness
+   */
+  private DPoint getRandomFreePoint(){
     boolean isfree=false;
     int testcount=0;
     DPoint p=null;
@@ -168,8 +171,7 @@ public class RModel{
           isfree=false;
           break SEEK;}}
       testcount++;}
-    return p;
-  }
+    return p;}
   
   /*
    * ################################
@@ -178,26 +180,6 @@ public class RModel{
    */
   
   static final double MAXVECTORMAGNITUDE=0.1;
-  
-  /*
-   * the phenomenon-representation-circles (PRC) grow and shrink and press on each other
-   * account for the physics of that
-   * the PRCs gravitate to the center of the clump, thus grouping and packing themselves. 
-   * Account for the physics of that too 
-   */
-//  void advancePhysics(){
-//    //get raw vectors
-//    List<DVector> gravity=getGravityVectors();
-//    List<DVector> bump=getBumpVectors();
-//    //sum, normalize and apply
-//    PCircle p;
-//    DVector sum;
-//    for(int i=0;i<circles.size();i++){
-//      p=circles.get(i);
-//      sum=new DVector(gravity.get(i),bump.get(i));
-//      if(sum.magnitude>MAXVECTORMAGNITUDE)
-//        sum.magnitude=MAXVECTORMAGNITUDE;
-//      p.center.applyVector(sum);}}
   
   void advancePhysics(){
     doCollisions();
@@ -209,8 +191,7 @@ public class RModel{
       p=circles.get(i);
       p.center.applyVector(v.get(i));}}
   
-  Set<Collision> collisions;
-  
+  private Set<Collision> collisions;
   
   private void doCollisions(){
     collisions=new HashSet<Collision>();

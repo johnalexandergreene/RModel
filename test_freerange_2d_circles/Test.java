@@ -1,5 +1,8 @@
 package org.fleen.rModel.test_freerange_2d_circles;
 
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class Test{
@@ -27,18 +30,30 @@ public class Test{
     public void advanced(){
       renderer.render();
       ui.repaint();
-//      exporter.export();
+      exporter.export();
       }};
       
   /*
    * ################################
-   * EXPORTDIR
+   * EXPORT
    * ################################
    */
       
   static final String EXPORT="/home/john/Desktop/rmodel_export";
   
   public File exportdir=new File(EXPORT);
+  
+  static final double EXPORTSCALE=1.6;
+  static final AffineTransform EXPORTTRANSFORM=AffineTransform.getScaleInstance(EXPORTSCALE,EXPORTSCALE);
+  
+  public BufferedImage getImageForExport(){
+    BufferedImage a=new BufferedImage(
+      (int)(renderer.image.getWidth()*EXPORTSCALE),
+      (int)(renderer.image.getHeight()*EXPORTSCALE),
+      BufferedImage.TYPE_INT_RGB);
+    Graphics2D g=a.createGraphics();
+    g.drawImage(renderer.image,EXPORTTRANSFORM,null);
+    return a;}
   
   /*
    * ################################
@@ -61,11 +76,11 @@ public class Test{
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
    */
   
-  public static final int SPAN=400;
+  public static final int SPAN=400,FRAMECOUNT=1440;
   
   public static final void main(String[] a){
     Test test=new Test();
-    for(int i=0;i<5500;i++){
+    for(int i=0;i<FRAMECOUNT;i++){
       test.rmodel.advanceState();
       System.out.println("RMODEL : "+test.rmodel);
      try{
