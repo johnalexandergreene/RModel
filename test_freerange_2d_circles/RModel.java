@@ -204,11 +204,15 @@ public class RModel{
           if(d>0)
             collisions.add(new Collision(c0,c1));}}}}
   
-  public Collision getCollision(PCircle c){
+  /*
+   * return all collisions that involve the specified circle
+   */
+  public List<Collision> getCollisions(PCircle c){
+    List<Collision> k=new ArrayList<Collision>();
     for(Collision a:collisions)
       if(a.c0==c||a.c1==c)
-        return a;
-    return null;}
+        k.add(a);
+    return k;}
   
   /*
    * ################################

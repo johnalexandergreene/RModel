@@ -84,27 +84,34 @@ public class PCircle{
   
   DVector vector=new DVector(0,0);
   static final double 
-    GRAVITYVECTORMAG=2.5,
-    VECTORRETARD=0.3,//0.05,
+    GRAVITYVECTORMAG=3.1,
+    VECTORRETARD=0.27,//0.05,
     COLLISIONMAGFACTOR=0.005;
   
   public DVector getVector(){
     vector.add(getGravityVector());
-    DVector c=getCollisionVector();
-    if(c!=null)vector=c;
+    DVector c=getSummedCollisionVectors();
+    if(c!=null)vector.add(c);
     vector.magnitude*=VECTORRETARD;
     return vector;}
   
-  private DVector getCollisionVector(){
-    //is there a collision?
-    Collision c=rmodel.getCollision(this);
-    if(c==null)return null;
+  private DVector getSummedCollisionVectors(){
+    //are there a collisions?
+    List<Collision> collisions=rmodel.getCollisions(this);
+    if(collisions.isEmpty())return null;
+    //sum those collision vectors
+    DVector s=new DVector(0,0);
+    for(Collision c:collisions)
+      s.add(getCollisionVector(c));
+    return s;}
+  
+  private DVector getCollisionVector(Collision collision){
     //specify which circle got collided with
     PCircle other;
-    if(c.c0==this)
-      other=c.c1;
+    if(collision.c0==this)
+      other=collision.c1;
     else
-      other=c.c0;
+      other=collision.c0;
     //get dir and mag
     double dir=other.getCenter().getDirection(getCenter());
     double mag=(other.getRadius()+getRadius())-other.getCenter().getDistance(getCenter())*COLLISIONMAGFACTOR;
