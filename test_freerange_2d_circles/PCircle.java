@@ -2,12 +2,31 @@ package org.fleen.rModel.test_freerange_2d_circles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.fleen.geom_2D.DPoint;
 import org.fleen.geom_2D.DVector;
 import org.fleen.geom_2D.GD;
 
+/*
+ * phenomenon circle
+ * a phenomenon in abstract, circular form
+ * a circle that 
+ *   is created, born among other circles, bounces off other circles like in a mosh pit
+ *   grows from an invisible point 
+ *   lingers
+ *   shrinks to invisible
+ *   is discarded
+ *   
+ * might paint an image on it too
+ */
 public class PCircle{
+  
+  /*
+   * ################################
+   * CONSTRUCTOR
+   * ################################
+   */
   
   public PCircle(RModel rmodel,DPoint center,double radius,double attack,double decay,int lifespan){
     this.rmodel=rmodel;
@@ -17,24 +36,38 @@ public class PCircle{
     this.decay=decay;
     this.lifespan=lifespan+(int)(maxradius/attack)+(int)(maxradius/decay);
     birthday=rmodel.age;
-  }
-  
-  RModel rmodel;
-  double attack,decay;
-  
-  public boolean killMe(){
-    return getAge()>lifespan;}
+    initForwardAndSpin();}
   
   /*
-   * this will advance the graphical representation 1 frame
+   * ################################
+   * RMODEL
+   * ################################
    */
+  
+  RModel rmodel;
+  
+  /*
+   * ################################
+   * ATTACK AND DECAY
+   * Control the growth and shrinkage rate of this circle
+   * Indirectly, control the lifespan
+   * ################################
+   */
+  
+  double attack,decay;
+  
+  /*
+   * ################################
+   * ADVANCE
+   * Every frame of the animation we call the advance method
+   * (we also call the advance-physics method, which controls the bouncing aroubnd, but that's in RModel)
+   * We probably update the image here to fit the location, spin and/or radius
+   * ################################
+   */
+  
   public void advance(){
     
   }
-  
-  private double maxradius;
-  public int birthday,lifespan;
-//  public DPoint center;
   
   /*
    * ################################
@@ -59,10 +92,36 @@ public class PCircle{
   
   /*
    * ################################
-   * RADIUS
-   * Dependent on age, attack and decay
+   * LIFE AND DEATH
    * ################################
    */
+  
+  public int 
+    birthday,
+    lifespan;
+  
+  public int getAge(){
+    return rmodel.age-birthday;}
+  
+  public boolean killMe(){
+    return getAge()>lifespan;}
+  
+  /*
+   * ################################
+   * GEOMETRY
+   * ################################
+   */
+  
+  Random rnd=new Random();
+  
+  /*
+   * ++++++++++++++++
+   * RADIUS
+   * Dependent on age, attack, decay and maxradius
+   * ++++++++++++++++
+   */
+  
+  private double maxradius;
   
   public double getRadius(){
     double a=getAge();
@@ -73,8 +132,32 @@ public class PCircle{
       r=maxradius-((a-shrinkpoint)*decay);
     return r;}
   
-  public int getAge(){
-    return rmodel.age-birthday;}
+  /*
+   * ++++++++++++++++
+   * FORWARD AND SPIN
+   * ++++++++++++++++
+   */
+  
+  
+  //TODO descretize these values to make the system more unified?
+  static final double[] SPINCREMENTS={
+    GD.PI2*0.05,
+    GD.PI2*0.01,
+    -GD.PI2*0.01,
+    -GD.PI2*0.05,};
+  
+  public double 
+    //radians. forward is initincrement+age*spincrement
+    initforward,
+    spincrement;
+
+  void initForwardAndSpin(){
+    initforward=rnd.nextDouble()*GD.PI2;
+    spincrement=SPINCREMENTS[rnd.nextInt(SPINCREMENTS.length)];}
+  
+  public double getForward(){
+    double f=spincrement+(getAge()*spincrement);
+    return f;}
   
   /*
    * ################################
