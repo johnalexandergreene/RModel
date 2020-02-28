@@ -1,15 +1,13 @@
 package org.fleen.rModel.core;
 
+import java.awt.Graphics2D;
+
 import org.fleen.geom_2D.DPoint;
 
-public class PShape{
+public interface PShape{
   
-  PShape(DPoint c,double r){
-    center=c;
-    radius=r;
-  }
+  DPoint getCenter();
   
-  DPoint center;
-  double radius;
+  void render(Graphics2D target,double scale);
 
 }

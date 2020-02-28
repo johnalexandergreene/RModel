@@ -5,6 +5,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import org.fleen.rModel.core.RModel;
+
 public class Test{
   
   /*
@@ -14,8 +16,8 @@ public class Test{
    */
   
   Test(){
-    rmodel=new RModel(SPAN,SPAN);
-    rmodel.observers.add(observer);
+    rmodel=new RModel();
+    rmodel.observer=observer;
     ui=new UI(this);
     renderer=new Renderer(this);
     exporter=new Exporter(this);}
@@ -30,7 +32,7 @@ public class Test{
     public void advanced(){
       renderer.render();
       ui.repaint();
-      exporter.export();
+//      exporter.export();
       }};
       
   /*

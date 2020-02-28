@@ -3,6 +3,9 @@ package org.fleen.rModel.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fleen.geom_2D.DPoint;
+import org.fleen.rModel.test_freerange_2d_circles.RModelObserver;
+
 /*
  * reality model
  * a bunch of shapes representing perceptual phenomena
@@ -40,16 +43,70 @@ import java.util.List;
  *   Thus map the edges of the shapes. It could be coarse, no matter. 
  *   Then get random samples until we have a number of prospective locations for the new shape. 
  *   Then pick one at random.
+ *   
+ * We will have a cell map. An array of squares
+ * Use it for mapping the space, for finding spaces to put new shapes
+ * 
+ * A PShape has center and radius in terms of RModel span
+ * 
+ * Rectangles could fit against other rectangles like bricks or tetris. To illustrate the the idea of ideas fitting together int a mass of models.
+ * 
+ * The view center is arbitrary. Init somewhere and then move as focus moves.
+ * The cell map dimensions are constant.
+ * The PShape dimensions are in terms of the cell map dimensions. IE a circle with diameter=1 will span the map
+ * The visual field fits the map
+ * We will have a scale. Zooming in as focus increases 
  * 
  */
 public class RModel{
   
   public RModel(){
+    //init with a single shape
+    PShape a=new PShape_TestCircle(new DPoint(0,0),0.2);
+    phenomena.add(a);
+    //focused upon
+    focus=a.getCenter();
+    //scaled to fit the new pshape nicely
+    scale=0.6;//scale = span of viewport (not the rendered span, of course, which is scaled again)
     
   }
   
-  double span=100;
+  public List<PShape> phenomena=new ArrayList<PShape>();
   
-  List<PShape> pshapes=new ArrayList<PShape>();
+  public DPoint focus;
+  public double scale;
+  
+  /*
+   * ################################
+   * STATE
+   * ################################
+   */
+  
+  
+  int age=0;
+  
+  public void advanceState(){
+    observer.advanced();
+    age++;}
+  
+  /*
+   * ################################
+   * OBSERVER
+   * ################################
+   */
+  
+  public RModelObserver observer;
+  
+  /*
+   * ################################
+   * OBJECT
+   * ################################
+   */
+  
+  public String toString(){
+    StringBuffer a=new StringBuffer("RMODEL");
+    a.append("\n pcount : "+phenomena.size());
+    a.append("\n age : "+age);
+    return a.toString();}
 
 }
