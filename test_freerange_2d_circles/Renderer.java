@@ -49,18 +49,16 @@ public class Renderer{
     g.setRenderingHints(RENDERING_HINTS);
     g.setPaint(Color.white);
     g.fillRect(0,0,w,h);
-    //
-    double scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;
-    DPoint center=test.rmodel.focus;
+    //do transform
+    double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;
+    DPoint viewcenter=test.rmodel.focus;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
-    t.translate(((center.x+((double)w)/2)/scale),((center.y+((double)h)/2)/scale));
+    t.translate((dw/(2*scale))-viewcenter.x,(dh/(2*scale))-viewcenter.y);
     g.setTransform(t);
-    //
+    //render all the shapes
     System.out.println("rendering "+test.rmodel.phenomena.size()+" phenomena");
     for(PShape p:test.rmodel.phenomena)
-      p.render(g,scale);
-      
-    }
+      p.render(g,scale);}
   
 }

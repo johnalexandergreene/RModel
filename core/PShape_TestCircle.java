@@ -19,9 +19,10 @@ public class PShape_TestCircle implements PShape{
   double radius;
   double STROKEWIDTH=2.0;
   
-  Color color=Color.blue;
+  Color color=Color.red;
   
   public void render(Graphics2D target,double scale){
+    target.setPaint(color);
     Ellipse2D e=new Ellipse2D.Double(center.x-radius,center.y-radius,radius*2,radius*2);
     Stroke s=new BasicStroke((float)((1.0/scale)*STROKEWIDTH));
     target.setStroke(s);

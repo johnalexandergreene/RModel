@@ -62,7 +62,9 @@ public class RModel{
   
   public RModel(){
     //init with a single shape
-    PShape a=new PShape_TestCircle(new DPoint(0,0),0.2);
+    PShape a=new PShape_TestCircle(new DPoint(0.2,0.2),0.2);
+    phenomena.add(a);
+    a=new PShape_TestCircle(new DPoint(0.3,0.3),0.1);
     phenomena.add(a);
     //focused upon
     focus=a.getCenter();
