@@ -29,7 +29,7 @@ public class Test{
    */
   
   RModelObserver observer=new RModelObserver(){
-    public void advanced(){
+    public void advance(){
       renderer.render();
       ui.repaint();
 //      exporter.export();

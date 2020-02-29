@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import org.fleen.geom_2D.DPoint;
-import org.fleen.rModel.core.PShape;
+import org.fleen.rModel.core.PDisk;
 
 public class Renderer{
   
@@ -51,14 +51,14 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     //do transform
     double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;
-    DPoint viewcenter=test.rmodel.focus;
+    DPoint viewcenter=test.rmodel.viewcenter;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
     t.translate((dw/(2*scale))-viewcenter.x,(dh/(2*scale))-viewcenter.y);
     g.setTransform(t);
     //render all the shapes
-    System.out.println("rendering "+test.rmodel.phenomena.size()+" phenomena");
-    for(PShape p:test.rmodel.phenomena)
+    System.out.println("rendering "+test.rmodel.pdisks.size()+" phenomena");
+    for(PDisk p:test.rmodel.pdisks)
       p.render(g,scale);}
   
 }

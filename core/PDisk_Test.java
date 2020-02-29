@@ -8,9 +8,9 @@ import java.awt.geom.Ellipse2D;
 
 import org.fleen.geom_2D.DPoint;
 
-public class PShape_TestCircle implements PShape{
+public class PDisk_Test implements PDisk{
   
-  PShape_TestCircle(DPoint c,double r){
+  PDisk_Test(DPoint c,double r){
     center=c;
     radius=r;
   }
@@ -30,5 +30,13 @@ public class PShape_TestCircle implements PShape{
   
   public DPoint getCenter(){
     return center;}
+  
+  public void advance(){
+    
+  }
+  
+  public double getRadius(){
+    return radius;
+  }
   
 }
