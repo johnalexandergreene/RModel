@@ -78,17 +78,8 @@ public class RModel{
   
   public RModel(){
     
-    //TEST
-    //init with a single disk
-    PDisk a=new PDisk_Test(new DPoint(0.0,0.0),GRIDINTERVAL*10);
+    PDisk a=new PDisk_Test(new DPoint(0.0,0.0),GRIDINTERVAL*5);
     pdisks.add(a);
-    Random rnd=new Random();
-    for(int i=0;i<100;i++)
-      addDisk(new PDisk_Test(rnd.nextInt(5)*GRIDINTERVAL+GRIDINTERVAL*10),null);
-    //focused upon
-    viewcenter=a.getCenter();
-    //scaled to fit the new pdisk nicely
-    scale=3;//graphically the viewport span is 1.0 . So a circle with diameter 0.7 is a bit smaller than the viewport. 
     
   }
   
@@ -103,11 +94,55 @@ public class RModel{
    * all disks have radius that is integer multiple of this
    * Thus we get a bit of graphical unity
    */
-  public static final double GRIDINTERVAL=0.02;
+  public static final double GRIDINTERVAL=1.0;
   
   /*
    * ################################
-   * SHAPES
+   * VIEW
+   * ################################
+   */
+  
+  public DPoint viewcenter=new DPoint(0,0);
+  
+  public double scale=123;
+  
+  void setViewCenter(PDisk disk){
+    viewcenter=disk.getCenter();}
+  
+  void setViewCenter(List<PDisk> disks){
+    //TODO
+    //centroid or whatever
+    }
+  
+  /*
+   * ################################
+   * STATE
+   * ################################
+   */
+  
+  int age=0;
+  
+  public void advanceState(){
+    
+    Random rnd=new Random();
+    addDisk(new PDisk_Test(rnd.nextInt(3)*GRIDINTERVAL+GRIDINTERVAL*3),null);
+    
+    advanceDiskStates();
+    observer.advance();
+    age++;}
+  
+  /*
+   * ################################
+   * OBSERVER
+   * ################################
+   */
+  
+  public RModelObserver observer;
+  
+  /*
+   * ################################
+   * DISKS
+   * Each disk represents a perceptual phenomenon
    * ################################
    */
   
@@ -128,9 +163,10 @@ public class RModel{
 //      location=getLocationForNewDisk(disk);
 //    else
 //      location=getLocationForNewDiskWithGrouping(disk,type);
-    location=getPlacementForNewDiskWithoutSpecificGrouping(disk);
-    disk.setCenter(location);
-    pdisks.add(disk);
+    location=getPlacementForNewDiskWithoutGrouping(disk);
+    if(location!=null){
+      disk.setCenter(location);
+      pdisks.add(disk);}
     
   }
   
@@ -138,17 +174,26 @@ public class RModel{
    * for each disk in the map
    *   get all possible 
    */
-  DPoint getPlacementForNewDiskWithSpecificGrouping(PDisk disk,String type){
+  DPoint getPlacementForNewDiskWithGrouping(PDisk disk,String type){
     //TODO
     return null;
   }
   
-  DPoint getPlacementForNewDiskWithoutSpecificGrouping(PDisk disk){
+  /*
+   * get map of all possible placements
+   * are there any dupes? If so then get the dupes in a set and discard the others
+   * from what remains get one at random. 
+   * 
+   * prefer placements closer to 0,0
+   */
+  DPoint getPlacementForNewDiskWithoutGrouping(PDisk disk){
     //TODO
     //this is a test
-    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(disk);
+    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDiskWithoutGrouping(disk);
+    if(prospects.isEmpty())return null;
     List<DPoint> a=new ArrayList<DPoint>();
-    a.addAll(prospects.values().iterator().next());
+    for(Set<DPoint> z:prospects.values())
+      a.addAll(z);
     Random r=new Random();
     return a.get(r.nextInt(a.size()));
     
@@ -158,32 +203,25 @@ public class RModel{
   
   
   /*
-   * group with only the disks that share the specified type
+   * group with the disks that share the specified type
    */
-  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithSpecificGrouping(PDisk newdisk,String type){
+  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithGrouping(PDisk newdisk,String type){
     Map<PDisk,Set<DPoint>> prospects;
     List<PDisk> possiblegroupings=new ArrayList<PDisk>();
     for(PDisk p:pdisks)
       if(p.getType().equals(type))
         possiblegroupings.add(p);
     if(possiblegroupings.isEmpty())
-      prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(newdisk);
+      prospects=getPlacementProspectsForNewDiskWithoutGrouping(newdisk);
     else
       prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
     if(prospects.isEmpty())
-      prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(newdisk);
-    if(prospects.isEmpty())
-      throw new IllegalArgumentException("no prospective placements gleaned");
+      prospects=getPlacementProspectsForNewDiskWithoutGrouping(newdisk);
     return prospects;}
   
-  /*
-   * all possible groupings are considered
-   */
-  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithoutSpecificGrouping(PDisk newdisk){
+  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithoutGrouping(PDisk newdisk){
     List<PDisk> possiblegroupings=new ArrayList<PDisk>(pdisks);
     Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
-    if(prospects.isEmpty())
-      throw new IllegalArgumentException("no prospective placements gleaned");
     return prospects;}
   
   /*
@@ -214,12 +252,13 @@ public class RModel{
    *     if newdisk is too close to olddisk then this point is a collision, remove it
    */
   void cullCollisions(PDisk newdisk,Set<DPoint> prospects){
-    List<DPoint> remove=new ArrayList<DPoint>();
+    List<DPoint> toremove=new ArrayList<DPoint>();
     for(DPoint prospect:prospects){
-      for(PDisk olddisk:pdisks){
-        if(isCollision(newdisk,olddisk,prospect))
-          remove.add(prospect);}}
-    prospects.removeAll(remove);}
+      TEST:for(PDisk olddisk:pdisks){
+        if(isCollision(newdisk,olddisk,prospect)){
+          toremove.add(prospect);
+          break TEST;}}}
+    prospects.removeAll(toremove);}
   
   boolean isCollision(PDisk newdisk,PDisk olddisk,DPoint prospect){
     double d=prospect.getDistance(olddisk.getCenter());
@@ -252,7 +291,7 @@ public class RModel{
    * yes, it's crude
    */
   DPoint getFurthestGridPoint(double[] raw,DPoint center){
-    double[][] gp=get4GridPoints(raw,GRIDINTERVAL);
+    double[][] gp=get4GridPoints(raw);
     double 
       d0=center.getDistance(gp[0][0],gp[0][1]),
       d1=center.getDistance(gp[1][0],gp[1][1]),
@@ -271,20 +310,20 @@ public class RModel{
    * given point p
    * get the 4 grid points closest to raw g0,g1,g2,g3 using mod math
    */
-  static double[][] get4GridPoints(double[] p,double gridinterval){
+  static double[][] get4GridPoints(double[] p){
     double px=p[0],py=p[1],gx0,gx1,gy0,gy1;
     if(px>0){
-      gx0=px-(px%gridinterval);
-      gx1=gx0+gridinterval;
+      gx0=px-(px%GRIDINTERVAL);
+      gx1=gx0+GRIDINTERVAL;
     }else{
-      gx0=px-(px%gridinterval);
-      gx1=gx0-gridinterval;}
+      gx0=px-(px%GRIDINTERVAL);
+      gx1=gx0-GRIDINTERVAL;}
     if(py>0){
-      gy0=py-(py%gridinterval);
-      gy1=gy0+gridinterval;
+      gy0=py-(py%GRIDINTERVAL);
+      gy1=gy0+GRIDINTERVAL;
     }else{
-      gy0=py-(py%gridinterval);
-      gy1=gy0-gridinterval;}
+      gy0=py-(py%GRIDINTERVAL);
+      gy1=gy0-GRIDINTERVAL;}
     double[][] gridpoints={
       {gx0,gy0},
       {gx0,gy1},
@@ -304,45 +343,6 @@ public class RModel{
 //    
 //  }
   
-  
-  
-  /*
-   * ################################
-   * VIEW
-   * ################################
-   */
-  
-  public DPoint viewcenter;
-  public double scale;
-  
-  void setViewCenter(PDisk disk){
-    viewcenter=disk.getCenter();}
-  
-  void setViewCenter(List<PDisk> disks){
-    //TODO
-    //centroid or whatever
-    }
-  
-  /*
-   * ################################
-   * STATE
-   * ################################
-   */
-  
-  int age=0;
-  
-  public void advanceState(){
-    advanceDiskStates();
-    observer.advance();
-    age++;}
-  
-  /*
-   * ################################
-   * OBSERVER
-   * ################################
-   */
-  
-  public RModelObserver observer;
   
   /*
    * ################################

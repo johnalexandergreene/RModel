@@ -82,9 +82,8 @@ public class Test{
     Test test=new Test();
     for(int i=0;i<FRAMECOUNT;i++){
       test.rmodel.advanceState();
-      System.out.println("RMODEL : "+test.rmodel);
      try{
-      Thread.sleep(20);
+      Thread.sleep(500);
      }catch(Exception x){};}}
     
 }
