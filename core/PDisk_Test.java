@@ -15,6 +15,10 @@ public class PDisk_Test implements PDisk{
     radius=r;
   }
   
+  PDisk_Test(double r){
+    radius=r;
+  }
+  
   DPoint center;
   double radius;
   double STROKEWIDTH=2.0;
@@ -37,6 +41,15 @@ public class PDisk_Test implements PDisk{
   
   public double getRadius(){
     return radius;
+  }
+
+  public void setCenter(DPoint p){
+    center=p;
+    
+  }
+
+  public String getType(){
+    return null;
   }
   
 }

@@ -8,11 +8,15 @@ public interface PDisk{
   
   DPoint getCenter();
   
+  void setCenter(DPoint p);
+  
   double getRadius();
   
   void render(Graphics2D graphics,double scale);
   
   //increment age and graphics 
   void advance();
+  
+  String getType();
 
 }

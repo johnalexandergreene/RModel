@@ -1,14 +1,16 @@
 package org.fleen.rModel.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.fleen.geom_2D.DPoint;
 import org.fleen.geom_2D.GD;
-import org.fleen.rModel.test_freerange_2d_circles.RModelObserver;
+import org.fleen.rModel.test000.RModelObserver;
 
 /*
  * reality model
@@ -78,14 +80,15 @@ public class RModel{
     
     //TEST
     //init with a single disk
-    PDisk a=new PDisk_Test(new DPoint(0.2,0.2),0.2);
+    PDisk a=new PDisk_Test(new DPoint(0.0,0.0),GRIDINTERVAL*10);
     pdisks.add(a);
-    a=new PDisk_Test(new DPoint(0.3,0.3),0.1);
-    pdisks.add(a);
+    Random rnd=new Random();
+    for(int i=0;i<100;i++)
+      addDisk(new PDisk_Test(rnd.nextInt(5)*GRIDINTERVAL+GRIDINTERVAL*10),null);
     //focused upon
     viewcenter=a.getCenter();
     //scaled to fit the new pdisk nicely
-    scale=0.7;//graphically the viewport span is 1.0 . So a circle with diameter 0.7 is a bit smaller than the viewport. 
+    scale=3;//graphically the viewport span is 1.0 . So a circle with diameter 0.7 is a bit smaller than the viewport. 
     
   }
   
@@ -100,15 +103,13 @@ public class RModel{
    * all disks have radius that is integer multiple of this
    * Thus we get a bit of graphical unity
    */
-  public static final double GRIDINTERVAL=0.05;
+  public static final double GRIDINTERVAL=0.02;
   
   /*
    * ################################
    * SHAPES
    * ################################
    */
-  
-  static double LOCATIONINCREMENT=0.05;
   
   public List<PDisk> pdisks=new ArrayList<PDisk>();
   
@@ -121,51 +122,119 @@ public class RModel{
    * if it isn't null then we try to place it with disks of the same type
    */
   void addDisk(PDisk disk,String type){
+    //TEST
     DPoint location=null;
-    if(type==null)
-      location=getLocationForNewDisk(disk);
-    else
-      location=getLocationForNewDiskWithGrouping(disk,type);
-    
-    //get location for the disk
-    //set location
-    //add it to the list
-    
-  }
-  
-  DPoint getLocationForNewDisk(PDisk disk){
-    
-  }
-  
-  DPoint getLocationForNewDiskWithGrouping(PDisk disk,String type){
-    
-  }
-  
-  List<DPoint> getRawLocationProspectsForUnmappedDiskWithGrouping(PDisk unmappeddisk,String type){
+//    if(type==null)
+//      location=getLocationForNewDisk(disk);
+//    else
+//      location=getLocationForNewDiskWithGrouping(disk,type);
+    location=getPlacementForNewDiskWithoutSpecificGrouping(disk);
+    disk.setCenter(location);
+    pdisks.add(disk);
     
   }
   
   /*
-   * For every pdisk on the map : disk0
-   *   get a set of possible adjacent locations for newdisk : disk0prospects
-   * disk0prospects locations will be at 
-   *   disk0.radius+newdisk.radius+GRIDINTERVAL, rounded outward to the nearest mod(GRIDINTERVAL) x and y
+   * for each disk in the map
+   *   get all possible 
    */
-  Set<DPoint> getRawLocationProspectsForUnmappedDisk(PDisk unmapped){
-    //first get points at mappeddisk.radius+unmappeddisk.radius+GRIDINTERVAL distance from mappeddisk.center
-    //get a number of points = olddisk.circumference/GRIDINTERVAL or thereabouts , equispaced
-    //then for each of those points, get the 4 GRIDINTERVAL points near that
-    //of those 4, keep the one furthest from olddisk.center
-    //that's the possible points for that particular mappeddisk
-    //we'll put them in a set to avoid dupes
-    Set<DPoint> rawlocations=new HashSet<DPoint>();
-    for(PDisk mapped:pdisks){
-      rawlocations.addAll(
-        getLocationsOnCircle(
-          mapped.getCenter(),mapped.getRadius()+unmapped.getRadius()+GRIDINTERVAL));}
-    return rawlocations;}
+  DPoint getPlacementForNewDiskWithSpecificGrouping(PDisk disk,String type){
+    //TODO
+    return null;
+  }
   
-  Set<DPoint> getLocationsOnCircle(DPoint center,double r){
+  DPoint getPlacementForNewDiskWithoutSpecificGrouping(PDisk disk){
+    //TODO
+    //this is a test
+    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(disk);
+    List<DPoint> a=new ArrayList<DPoint>();
+    a.addAll(prospects.values().iterator().next());
+    Random r=new Random();
+    return a.get(r.nextInt(a.size()));
+    
+    
+    
+  }
+  
+  
+  /*
+   * group with only the disks that share the specified type
+   */
+  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithSpecificGrouping(PDisk newdisk,String type){
+    Map<PDisk,Set<DPoint>> prospects;
+    List<PDisk> possiblegroupings=new ArrayList<PDisk>();
+    for(PDisk p:pdisks)
+      if(p.getType().equals(type))
+        possiblegroupings.add(p);
+    if(possiblegroupings.isEmpty())
+      prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(newdisk);
+    else
+      prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
+    if(prospects.isEmpty())
+      prospects=getPlacementProspectsForNewDiskWithoutSpecificGrouping(newdisk);
+    if(prospects.isEmpty())
+      throw new IllegalArgumentException("no prospective placements gleaned");
+    return prospects;}
+  
+  /*
+   * all possible groupings are considered
+   */
+  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithoutSpecificGrouping(PDisk newdisk){
+    List<PDisk> possiblegroupings=new ArrayList<PDisk>(pdisks);
+    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
+    if(prospects.isEmpty())
+      throw new IllegalArgumentException("no prospective placements gleaned");
+    return prospects;}
+  
+  /*
+   * Given newdisk.
+   * Get all possible places to put it on the the map. 
+   * Consider all disks presently in the map : olddisks .
+   * Grid points on the circumferences of olddisks are our prospective placements.
+   * Cull placements that are too close or collide with any olddisks.
+   */
+  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDisk(PDisk newdisk,List<PDisk> possiblegroupings){
+    Map<PDisk,Set<DPoint>> rawplacementprospects=new HashMap<PDisk,Set<DPoint>>();
+    Set<DPoint> a;
+    for(PDisk olddisk:possiblegroupings){
+      a=new HashSet<DPoint>();
+      a.addAll(
+        getGridPointsOnCircle(
+          olddisk.getCenter(),olddisk.getRadius()+newdisk.getRadius()+GRIDINTERVAL));
+      cullCollisions(olddisk,a);
+      if(!a.isEmpty())
+        rawplacementprospects.put(olddisk,a);}
+    return rawplacementprospects;}
+  
+  /*
+   * Given a disk : newdisk
+   * Given a set of possible points to place it : prospects
+   * for newdisk centered at each prospect
+   *   check distance from each disk in the map : olddisk
+   *     if newdisk is too close to olddisk then this point is a collision, remove it
+   */
+  void cullCollisions(PDisk newdisk,Set<DPoint> prospects){
+    List<DPoint> remove=new ArrayList<DPoint>();
+    for(DPoint prospect:prospects){
+      for(PDisk olddisk:pdisks){
+        if(isCollision(newdisk,olddisk,prospect))
+          remove.add(prospect);}}
+    prospects.removeAll(remove);}
+  
+  boolean isCollision(PDisk newdisk,PDisk olddisk,DPoint prospect){
+    double d=prospect.getDistance(olddisk.getCenter());
+    double min=olddisk.getRadius()+newdisk.getRadius()+GRIDINTERVAL;
+    if(d<min)
+      return true;
+    return false;}
+  
+  /*
+   * Given a circle
+   * Get all points on circumference, at GRIDINTERVAL spacing (a rough spacing, yes, but probably thorough enough)
+   * then get a grid point near each of those circumference points
+   * and put them all in a set to cull dupes
+   */
+  Set<DPoint> getGridPointsOnCircle(DPoint center,double r){
     Set<DPoint> locations=new HashSet<DPoint>(); 
     double circumference=GD.PI*r*2;
     int locationscount=(int)(circumference/GRIDINTERVAL)+1;
@@ -175,21 +244,65 @@ public class RModel{
     for(int i=0;i<locationscount;i++){
       d=angularinterval*i;
       rawpoint=GD.getPoint_PointDirectionInterval(center.x,center.y,d,r);
-      locations.add(getFurthestPointOnGrid(rawpoint,center));}
+      locations.add(getFurthestGridPoint(rawpoint,center));}
     return locations;}
   
   /*
-   * given point raw and center
-   * get the 8 grid points closest to raw : p0,p1... p7
-   * get the grid point furthest from p1
+   * Of the 4 grid points adjacent to raw, get the furthest from center
+   * yes, it's crude
    */
+  DPoint getFurthestGridPoint(double[] raw,DPoint center){
+    double[][] gp=get4GridPoints(raw,GRIDINTERVAL);
+    double 
+      d0=center.getDistance(gp[0][0],gp[0][1]),
+      d1=center.getDistance(gp[1][0],gp[1][1]),
+      d2=center.getDistance(gp[2][0],gp[2][1]),
+      d3=center.getDistance(gp[3][0],gp[3][1]);
+    if(d0>d1&&d0>d2&&d0>d3)
+      return new DPoint(gp[0]);
+    else if(d1>d0&&d1>d2&&d1>d3)
+      return new DPoint(gp[1]);
+    else if(d2>d0&&d2>d1&&d2>d3)
+      return new DPoint(gp[2]);
+    else
+      return new DPoint(gp[3]);}
   
-  DPoint getFurthestPointOnGrid(double[] raw,DPoint center){
-    double a=raw[1]%GRIDINTERVAL;
-    double[] p0={raw[0],raw[1]+a};
-    
-    
-  }
+  /*
+   * given point p
+   * get the 4 grid points closest to raw g0,g1,g2,g3 using mod math
+   */
+  static double[][] get4GridPoints(double[] p,double gridinterval){
+    double px=p[0],py=p[1],gx0,gx1,gy0,gy1;
+    if(px>0){
+      gx0=px-(px%gridinterval);
+      gx1=gx0+gridinterval;
+    }else{
+      gx0=px-(px%gridinterval);
+      gx1=gx0-gridinterval;}
+    if(py>0){
+      gy0=py-(py%gridinterval);
+      gy1=gy0+gridinterval;
+    }else{
+      gy0=py-(py%gridinterval);
+      gy1=gy0-gridinterval;}
+    double[][] gridpoints={
+      {gx0,gy0},
+      {gx0,gy1},
+      {gx1,gy1},
+      {gx1,gy0}};
+    return gridpoints;}
+  
+//  public static final void main(String[] a){
+//    double[] p={-0.2,0.2}; 
+//    double[][] gp=get4GridPoints(p,0.3);
+//    System.out.println("point=("+p[0]+","+p[1]+")");
+//    System.out.println("gridpoints");
+//    System.out.println("gp0("+gp[0][0]+","+gp[0][1]+")");
+//    System.out.println("gp1("+gp[1][0]+","+gp[1][1]+")");
+//    System.out.println("gp2("+gp[2][0]+","+gp[2][1]+")");
+//    System.out.println("gp3("+gp[3][0]+","+gp[3][1]+")");
+//    
+//  }
   
   
   
