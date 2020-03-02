@@ -1,1 +1,13 @@
-Collisions are happening. The culler ain't culling completely
+Collisions are happening. The culler ain't culling completely or something
+
+no collisions when disk radius is constant. that's a clue
+
+create ProspectiveLocation Objects
+contains a raw on-circumference location
+a refined-to-grid-coors location
+a distance to origin, for sorting
+
+Put diameter and centers in terms of GRIDINTERVAL. Ie, an integer. Translated to real coors in the getter
+
+PDisks will need a reference to the RModel
+

@@ -10,7 +10,7 @@ import org.fleen.geom_2D.DPoint;
 
 public class PDisk_Test implements PDisk{
   
-  PDisk_Test(DPoint c,double r){
+  PDisk_Test(RModelGridCoor c,double r){
     center=c;
     radius=r;
   }
@@ -19,7 +19,7 @@ public class PDisk_Test implements PDisk{
     radius=r;
   }
   
-  DPoint center;
+  RModelGridCoor center;
   double radius;
   double STROKEWIDTH=2.0;
   
@@ -27,12 +27,12 @@ public class PDisk_Test implements PDisk{
   
   public void render(Graphics2D target,double scale){
     target.setPaint(color);
-    Ellipse2D e=new Ellipse2D.Double(center.x-radius,center.y-radius,radius*2,radius*2);
+    Ellipse2D e=new Ellipse2D.Double(center.getRealX()-radius,center.getRealY()-radius,radius*2,radius*2);
     Stroke s=new BasicStroke((float)((1.0/scale)*STROKEWIDTH));
     target.setStroke(s);
     target.draw(e);}
   
-  public DPoint getCenter(){
+  public RModelGridCoor getCenter(){
     return center;}
   
   public void advance(){
@@ -43,10 +43,8 @@ public class PDisk_Test implements PDisk{
     return radius;
   }
 
-  public void setCenter(DPoint p){
-    center=p;
-    
-  }
+  public void setCenter(RModelGridCoor c){
+    center=c;}
 
   public String getType(){
     return null;

@@ -78,7 +78,7 @@ public class RModel{
   
   public RModel(){
     
-    PDisk a=new PDisk_Test(new DPoint(0.0,0.0),GRIDINTERVAL*5);
+    PDisk a=new PDisk_Test(new RModelGridCoor(this,0,0),GRIDINTERVAL*2);
     pdisks.add(a);
     
   }
@@ -94,7 +94,15 @@ public class RModel{
    * all disks have radius that is integer multiple of this
    * Thus we get a bit of graphical unity
    */
-  public static final double GRIDINTERVAL=1.0;
+  public static final double 
+    GRIDINTERVAL=1.0,
+    DISKGAP=0.25;
+  
+  public double getGridInterval(){
+    return GRIDINTERVAL;}
+  
+  public double getDiskGap(){
+    return DISKGAP;}
   
   /*
    * ################################
@@ -107,7 +115,7 @@ public class RModel{
   public double scale=123;
   
   void setViewCenter(PDisk disk){
-    viewcenter=disk.getCenter();}
+    viewcenter=disk.getCenter().getDPoint();}
   
   void setViewCenter(List<PDisk> disks){
     //TODO
@@ -125,7 +133,7 @@ public class RModel{
   public void advanceState(){
     
     Random rnd=new Random();
-    addDisk(new PDisk_Test(rnd.nextInt(3)*GRIDINTERVAL+GRIDINTERVAL*3),null);
+    addDisk(new PDisk_Test(rnd.nextInt(4)*GRIDINTERVAL+GRIDINTERVAL*2),null);
     
     advanceDiskStates();
     observer.advance();
@@ -158,7 +166,7 @@ public class RModel{
    */
   void addDisk(PDisk disk,String type){
     //TEST
-    DPoint location=null;
+    RModelGridCoor location=null;
 //    if(type==null)
 //      location=getLocationForNewDisk(disk);
 //    else
@@ -186,13 +194,13 @@ public class RModel{
    * 
    * prefer placements closer to 0,0
    */
-  DPoint getPlacementForNewDiskWithoutGrouping(PDisk disk){
+  RModelGridCoor getPlacementForNewDiskWithoutGrouping(PDisk disk){
     //TODO
     //this is a test
-    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDiskWithoutGrouping(disk);
+    Map<PDisk,Set<RModelGridCoor>> prospects=getPlacementProspectsForNewDiskWithoutGrouping(disk);
     if(prospects.isEmpty())return null;
-    List<DPoint> a=new ArrayList<DPoint>();
-    for(Set<DPoint> z:prospects.values())
+    List<RModelGridCoor> a=new ArrayList<RModelGridCoor>();
+    for(Set<RModelGridCoor> z:prospects.values())
       a.addAll(z);
     Random r=new Random();
     return a.get(r.nextInt(a.size()));
@@ -205,8 +213,8 @@ public class RModel{
   /*
    * group with the disks that share the specified type
    */
-  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithGrouping(PDisk newdisk,String type){
-    Map<PDisk,Set<DPoint>> prospects;
+  Map<PDisk,Set<RModelGridCoor>> getPlacementProspectsForNewDiskWithGrouping(PDisk newdisk,String type){
+    Map<PDisk,Set<RModelGridCoor>> prospects;
     List<PDisk> possiblegroupings=new ArrayList<PDisk>();
     for(PDisk p:pdisks)
       if(p.getType().equals(type))
@@ -219,9 +227,9 @@ public class RModel{
       prospects=getPlacementProspectsForNewDiskWithoutGrouping(newdisk);
     return prospects;}
   
-  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDiskWithoutGrouping(PDisk newdisk){
+  Map<PDisk,Set<RModelGridCoor>> getPlacementProspectsForNewDiskWithoutGrouping(PDisk newdisk){
     List<PDisk> possiblegroupings=new ArrayList<PDisk>(pdisks);
-    Map<PDisk,Set<DPoint>> prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
+    Map<PDisk,Set<RModelGridCoor>> prospects=getPlacementProspectsForNewDisk(newdisk,possiblegroupings);
     return prospects;}
   
   /*
@@ -231,14 +239,14 @@ public class RModel{
    * Grid points on the circumferences of olddisks are our prospective placements.
    * Cull placements that are too close or collide with any olddisks.
    */
-  Map<PDisk,Set<DPoint>> getPlacementProspectsForNewDisk(PDisk newdisk,List<PDisk> possiblegroupings){
-    Map<PDisk,Set<DPoint>> rawplacementprospects=new HashMap<PDisk,Set<DPoint>>();
-    Set<DPoint> a;
+  Map<PDisk,Set<RModelGridCoor>> getPlacementProspectsForNewDisk(PDisk newdisk,List<PDisk> possiblegroupings){
+    Map<PDisk,Set<RModelGridCoor>> rawplacementprospects=new HashMap<PDisk,Set<RModelGridCoor>>();
+    Set<RModelGridCoor> a;
     for(PDisk olddisk:possiblegroupings){
-      a=new HashSet<DPoint>();
+      a=new HashSet<RModelGridCoor>();
       a.addAll(
-        getGridPointsOnCircle(
-          olddisk.getCenter(),olddisk.getRadius()+newdisk.getRadius()+GRIDINTERVAL));
+        getGridCoorsOnCircle(
+          olddisk.getCenter(),olddisk.getRadius()+newdisk.getRadius()+DISKGAP));
       cullCollisions(olddisk,a);
       if(!a.isEmpty())
         rawplacementprospects.put(olddisk,a);}
@@ -251,18 +259,18 @@ public class RModel{
    *   check distance from each disk in the map : olddisk
    *     if newdisk is too close to olddisk then this point is a collision, remove it
    */
-  void cullCollisions(PDisk newdisk,Set<DPoint> prospects){
-    List<DPoint> toremove=new ArrayList<DPoint>();
-    for(DPoint prospect:prospects){
+  void cullCollisions(PDisk newdisk,Set<RModelGridCoor> prospects){
+    List<RModelGridCoor> toremove=new ArrayList<RModelGridCoor>();
+    for(RModelGridCoor prospect:prospects){
       TEST:for(PDisk olddisk:pdisks){
         if(isCollision(newdisk,olddisk,prospect)){
           toremove.add(prospect);
           break TEST;}}}
     prospects.removeAll(toremove);}
   
-  boolean isCollision(PDisk newdisk,PDisk olddisk,DPoint prospect){
-    double d=prospect.getDistance(olddisk.getCenter());
-    double min=olddisk.getRadius()+newdisk.getRadius()+GRIDINTERVAL;
+  boolean isCollision(PDisk newdisk,PDisk olddisk,RModelGridCoor prospect){
+    double d=prospect.getDPoint().getDistance(olddisk.getCenter().getDPoint());
+    double min=olddisk.getRadius()+newdisk.getRadius()+DISKGAP;
     if(d<min)
       return true;
     return false;}
@@ -273,8 +281,8 @@ public class RModel{
    * then get a grid point near each of those circumference points
    * and put them all in a set to cull dupes
    */
-  Set<DPoint> getGridPointsOnCircle(DPoint center,double r){
-    Set<DPoint> locations=new HashSet<DPoint>(); 
+  Set<RModelGridCoor> getGridCoorsOnCircle(RModelGridCoor center,double r){
+    Set<RModelGridCoor> locations=new HashSet<RModelGridCoor>(); 
     double circumference=GD.PI*r*2;
     int locationscount=(int)(circumference/GRIDINTERVAL)+1;
     double angularinterval=GD.PI2/locationscount;
@@ -282,53 +290,54 @@ public class RModel{
     double[] rawpoint;
     for(int i=0;i<locationscount;i++){
       d=angularinterval*i;
-      rawpoint=GD.getPoint_PointDirectionInterval(center.x,center.y,d,r);
-      locations.add(getFurthestGridPoint(rawpoint,center));}
+      rawpoint=GD.getPoint_PointDirectionInterval(center.getRealX(),center.getRealY(),d,r);
+      locations.add(getFurthestGridCoor(rawpoint,center.getDPoint()));}
     return locations;}
   
   /*
    * Of the 4 grid points adjacent to raw, get the furthest from center
    * yes, it's crude
    */
-  DPoint getFurthestGridPoint(double[] raw,DPoint center){
-    double[][] gp=get4GridPoints(raw);
+  RModelGridCoor getFurthestGridCoor(double[] raw,DPoint center){
+    RModelGridCoor[] gp=get4GridPoints(raw);
     double 
-      d0=center.getDistance(gp[0][0],gp[0][1]),
-      d1=center.getDistance(gp[1][0],gp[1][1]),
-      d2=center.getDistance(gp[2][0],gp[2][1]),
-      d3=center.getDistance(gp[3][0],gp[3][1]);
+      d0=center.getDistance(gp[0].getDPoint()),
+      d1=center.getDistance(gp[1].getDPoint()),
+      d2=center.getDistance(gp[2].getDPoint()),
+      d3=center.getDistance(gp[3].getDPoint());
     if(d0>d1&&d0>d2&&d0>d3)
-      return new DPoint(gp[0]);
+      return gp[0];
     else if(d1>d0&&d1>d2&&d1>d3)
-      return new DPoint(gp[1]);
+      return gp[1];
     else if(d2>d0&&d2>d1&&d2>d3)
-      return new DPoint(gp[2]);
+      return gp[2];
     else
-      return new DPoint(gp[3]);}
+      return gp[3];}
   
   /*
    * given point p
    * get the 4 grid points closest to raw g0,g1,g2,g3 using mod math
    */
-  static double[][] get4GridPoints(double[] p){
-    double px=p[0],py=p[1],gx0,gx1,gy0,gy1;
+  RModelGridCoor[] get4GridPoints(double[] p){
+    double px=p[0],py=p[1];
+    int gx0,gx1,gy0,gy1;
     if(px>0){
-      gx0=px-(px%GRIDINTERVAL);
-      gx1=gx0+GRIDINTERVAL;
+      gx0=(int)px;
+      gx1=(int)gx0+1;
     }else{
-      gx0=px-(px%GRIDINTERVAL);
-      gx1=gx0-GRIDINTERVAL;}
+      gx0=(int)px;
+      gx1=(int)gx0-1;}
     if(py>0){
-      gy0=py-(py%GRIDINTERVAL);
-      gy1=gy0+GRIDINTERVAL;
+      gy0=(int)py;
+      gy1=(int)gy0+1;
     }else{
-      gy0=py-(py%GRIDINTERVAL);
-      gy1=gy0-GRIDINTERVAL;}
-    double[][] gridpoints={
-      {gx0,gy0},
-      {gx0,gy1},
-      {gx1,gy1},
-      {gx1,gy0}};
+      gy0=(int)py;
+      gy1=(int)gy0-1;}
+    RModelGridCoor[] gridpoints={
+      new RModelGridCoor(this,gx0,gy0),
+      new RModelGridCoor(this,gx0,gy1),
+      new RModelGridCoor(this,gx1,gy1),
+      new RModelGridCoor(this,gx1,gy0)};
     return gridpoints;}
   
 //  public static final void main(String[] a){

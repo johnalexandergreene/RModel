@@ -6,9 +6,9 @@ import org.fleen.geom_2D.DPoint;
 
 public interface PDisk{
   
-  DPoint getCenter();
+  RModelGridCoor getCenter();
   
-  void setCenter(DPoint p);
+  void setCenter(RModelGridCoor p);
   
   double getRadius();
   
