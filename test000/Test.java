@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.fleen.rModel.core.RModel;
+import org.fleen.rModel.core.RModelObserver;
 
 public class Test{
   
@@ -29,7 +30,8 @@ public class Test{
    */
   
   RModelObserver observer=new RModelObserver(){
-    public void advance(){
+    public void incrementedState(){
+      System.out.println("incremented state");
       renderer.render();
       ui.repaint();
 //      exporter.export();

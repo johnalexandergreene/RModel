@@ -1,14 +1,17 @@
 package org.fleen.rModel.test000;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.List;
 
-import org.fleen.geom_2D.DPoint;
-import org.fleen.rModel.core.PDisk;
+import org.fleen.rModel.core.Cell;
+import org.fleen.rModel.core.Mandala_Abstract;
 
 public class Renderer{
   
@@ -44,21 +47,49 @@ public class Renderer{
     render(DEFAULT_VIEWPORT_SPAN,DEFAULT_VIEWPORT_SPAN);}
       
   void render(int w,int h){
+    System.out.println("rendering");
     image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
     Graphics2D g=image.createGraphics();
     g.setRenderingHints(RENDERING_HINTS);
     g.setPaint(Color.white);
     g.fillRect(0,0,w,h);
+    
     //do transform
-    double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;
-    DPoint viewcenter=test.rmodel.viewcenter;
+    double dw=w,dh=h,scale=20;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
-    t.translate((dw/(2*scale))-viewcenter.x,(dh/(2*scale))-viewcenter.y);
+    t.translate((dw/(2*scale)),(dh/(2*scale)));
     g.setTransform(t);
-    //render all the shapes
-    System.out.println("rendering "+test.rmodel.pdisks.size()+" phenomena");
-    for(PDisk p:test.rmodel.pdisks)
-      p.render(g,scale);}
+    //
+    for(Mandala_Abstract m:test.rmodel.mandalas)
+      renderMandala(g,m);
+      
+  }
+  
+  private void renderMandala(Graphics2D g,Mandala_Abstract m){
+    System.out.println("rendering a mandala");
+    List<Cell> edge=m.getEdgeCells();
+    g.setStroke(new BasicStroke((float)(1.0)));
+    g.setPaint(Color.yellow);
+    for(Cell c:edge)
+      g.drawLine(c.x,c.y,c.x,c.y);  
+    //
+    double x=m.centerx,y=m.centery,r=m.radius;
+    g.setStroke(new BasicStroke((float)(2.0/g.getTransform().getScaleX())));
+    g.setPaint(Color.black);
+    Ellipse2D e=new Ellipse2D.Double(x-r,y-r,r*2,r*2);
+    g.draw(e);}
+    
+//    //do transform
+//    double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;
+//    DPoint viewcenter=test.rmodel.viewcenter;
+//    AffineTransform t=new AffineTransform();
+//    t.scale(scale,scale);
+//    t.translate((dw/(2*scale))-viewcenter.x,(dh/(2*scale))-viewcenter.y);
+//    g.setTransform(t);
+//    //render all the shapes
+//    System.out.println("rendering "+test.rmodel.pdisks.size()+" phenomena");
+//    for(PDisk p:test.rmodel.pdisks)
+//      p.render(g,scale);}
   
 }
