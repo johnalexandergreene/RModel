@@ -72,7 +72,7 @@ public class RModel{
   public RModel(){
     
     addMandala(new Mandala_Test(this,5));
-    addMandala(new Mandala_Test(this,3));
+//    addMandala(new Mandala_Test(this,3));
   }
   
   /*

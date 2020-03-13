@@ -2,8 +2,11 @@ package org.fleen.rModel.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Mandala_Abstract{
   
@@ -39,19 +42,51 @@ public abstract class Mandala_Abstract{
   
   public int centerx,centery,radius;
   
-  List<Cell> 
+  Set<Cell> 
     edgecells=null,//the cells at the edge of this mandala circle
-    skincells=null;//the cells just beyond the edge. we test them for collisions and such
+    skincells=null;//the cells adjacent to the edge cells outside the circle. we test them for collisions and such
   
-  public List<Cell> getEdgeCells(){
+  public Set<Cell> getEdgeCells(){
    if(edgecells==null)initEdgeCells();
    return edgecells;}
   
   public void initEdgeCells(){
     int[][] edgecellcoors=getCircleEdgeCellCoors(radius);
-    edgecells=new ArrayList<Cell>(edgecellcoors.length);
+    edgecells=new HashSet<Cell>(edgecellcoors.length);
     for(int[] a:edgecellcoors)
-      edgecells.add(new Cell(this,a[0]+centerx,a[1]+centery));}
+      edgecells.add(new Cell(a[0]+centerx,a[1]+centery));}
+  
+  public Set<Cell> getSkinCells(){
+    if(skincells==null)initSkinCells();
+    return skincells;}
+  
+  /*
+   * for each cell in edgecells : ec
+   * get all cells adjacent to ec
+   * put them all in a set : b
+   * remove from b all edge cells
+   * remove from b cells inside the circle
+   */
+  private void initSkinCells(){
+    Set<Cell> ec=getEdgeCells();
+    skincells=new HashSet<Cell>();
+    for(Cell c:ec)
+      skincells.addAll(c.getAdjacents());
+    skincells.removeAll(edgecells);
+    removeInsideCells(skincells);}
+  
+  private void removeInsideCells(Set<Cell> skincells){
+    Iterator<Cell> i=skincells.iterator();
+    Cell c;
+    while(i.hasNext()){
+      c=i.next();
+      if(isInside(c))
+        i.remove();}}
+  
+  private boolean isInside(Cell c){
+    double a=c.center.getDistance(centerx,centery);
+    boolean b=a<radius;
+    return b;}
   
   /*
    * ################################

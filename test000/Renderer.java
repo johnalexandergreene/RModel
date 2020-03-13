@@ -8,7 +8,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import org.fleen.rModel.core.Cell;
 import org.fleen.rModel.core.Mandala_Abstract;
@@ -68,10 +68,17 @@ public class Renderer{
   
   private void renderMandala(Graphics2D g,Mandala_Abstract m){
     System.out.println("rendering a mandala");
-    List<Cell> edge=m.getEdgeCells();
+    Set<Cell> 
+      edge=m.getEdgeCells(),
+      skin=m.getSkinCells();
+    //
     g.setStroke(new BasicStroke((float)(1.0)));
-    g.setPaint(Color.yellow);
+    g.setPaint(Color.red);
     for(Cell c:edge)
+      g.drawLine(c.x,c.y,c.x,c.y);  
+    //
+    g.setPaint(Color.green);
+    for(Cell c:skin)
       g.drawLine(c.x,c.y,c.x,c.y);  
     //
     double x=m.centerx,y=m.centery,r=m.radius;
