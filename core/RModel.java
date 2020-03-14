@@ -1,6 +1,8 @@
 package org.fleen.rModel.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -115,22 +117,21 @@ public class RModel{
    * ################################
    */
   
-  int age=0;
+  public int age=0;
   
   public void advanceState(){
     incrementMandalaStates();
     
     //TEST
     Random rnd=new Random();
-    mandalas.clear();
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
-    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    int c=15;
+    for(int i=0;i<c;i++)
+      if(mandalas.size()>6)
+        removeRandomMandala();
+    for(int i=0;i<c;i++)
+      if(mandalas.size()<15)
+        addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    
     
     observer.incrementedState();
     age++;}
@@ -172,6 +173,13 @@ public class RModel{
       m.setLocation(c.x,c.y);}
     //
     mandalas.add(m);}
+  
+  void removeRandomMandala(){
+    Random rnd=new Random();
+    int a=rnd.nextInt(mandalas.size());
+    mandalas.remove(a);}
+  
+  private static final int RANDOMSELECTIONSAMPLESIZE=3;
   
   /*
    * (TODO : also do a method to position adjacent to a subset. A group, by tag)
@@ -226,14 +234,47 @@ public class RModel{
     //so we need a rating system. Then we sort them by rating
     Map<ProspectiveMandalaLocation,Double> distancetooriginbylocation=getDistancesToOrigin(locations0);
     Map<ProspectiveMandalaLocation,Integer> touchcountbylocation=getTouchcounts(locations0,mnew);
-    Map<ProspectiveMandalaLocation,Double> ratingbyloction=ratelocations(distancetooriginbylocation,touchcountbylocation);
-    sortByRating(locations0,ratingbyloction);
-    locations0.//keep the best 3 and pick at random?
-    //TEST
+    Map<ProspectiveMandalaLocation,Double> ratingbylocation=rateProspects(distancetooriginbylocation,touchcountbylocation);
+    Collections.sort(locations0,new PMLComparator(ratingbylocation));
+    //pick from the best 3 at random?
     Random rnd=new Random();
-    return locations0.get(rnd.nextInt(locations0.size()));
+    return locations0.get(rnd.nextInt(RANDOMSELECTIONSAMPLESIZE));}
+  
+  static final double 
+    DISTANCESCALE=1.9,
+    TOUCHSCALE=1.0;
+  
+  Map<ProspectiveMandalaLocation,Double> rateProspects(
+    Map<ProspectiveMandalaLocation,Double> distancetooriginbylocation,
+    Map<ProspectiveMandalaLocation,Integer> touchcountbylocation){
+    Map<ProspectiveMandalaLocation,Double> ratings=new HashMap<ProspectiveMandalaLocation,Double>();
+    double distance,touches,rating;
+    for(ProspectiveMandalaLocation p:distancetooriginbylocation.keySet()){
+      distance=distancetooriginbylocation.get(p);
+      touches=touchcountbylocation.get(p);
+      rating=touches*TOUCHSCALE-distance*DISTANCESCALE;//distance is negative because lower is better
+      ratings.put(p,rating);}
+    return ratings;}
+  
+  class PMLComparator implements Comparator<ProspectiveMandalaLocation>{
     
-  }
+    PMLComparator(Map<ProspectiveMandalaLocation,Double> ratings){
+      this.ratings=ratings;}
+    
+    Map<ProspectiveMandalaLocation,Double> ratings;
+
+    public int compare(
+      ProspectiveMandalaLocation a0,
+      ProspectiveMandalaLocation a1){
+      double 
+        r0=ratings.get(a0),
+        r1=ratings.get(a1);
+      if(r0<r1){
+        return 1;
+      }else if(r0==r1){
+        return 0;
+      }else{
+        return -1;}}}
   
   Map<ProspectiveMandalaLocation,Double> getDistancesToOrigin(List<ProspectiveMandalaLocation> locations0){
     Map<ProspectiveMandalaLocation,Double> distancetooriginbylocation=new HashMap<ProspectiveMandalaLocation,Double>();

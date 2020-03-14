@@ -34,7 +34,7 @@ public class Test{
       System.out.println("incremented state");
       renderer.render();
       ui.repaint();
-//      exporter.export();
+      exporter.export();
       }};
       
   /*
@@ -44,7 +44,7 @@ public class Test{
    */
       
   static final String EXPORTDIR="/home/john/Desktop/rmodel_export";
-  static final double EXPORTSCALE=1.6;
+  static final double EXPORTSCALE=0.9;
   static final AffineTransform EXPORTTRANSFORM=AffineTransform.getScaleInstance(EXPORTSCALE,EXPORTSCALE);
   public File exportdir=new File(EXPORTDIR);
   Exporter exporter;
@@ -78,14 +78,14 @@ public class Test{
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
    */
   
-  public static final int SPAN=400,FRAMECOUNT=1440;
+  public static final int SPAN=400,FRAMECOUNT=200;
   
   public static final void main(String[] a){
     Test test=new Test();
     for(int i=0;i<FRAMECOUNT;i++){
       test.rmodel.advanceState();
      try{
-      Thread.sleep(1000);
+      Thread.sleep(10);
      }catch(Exception x){};}}
     
 }
