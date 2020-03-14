@@ -1,6 +1,7 @@
 package org.fleen.rModel.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -87,7 +88,7 @@ public class RModel{
    * ################################
    */
   
-  
+  public static final double CELLSPAN=1.0;
   
   /*
    * ################################
@@ -165,10 +166,10 @@ public class RModel{
   
   public void addMandala(Mandala_Abstract m){
     if(mandalas.isEmpty()){
-      m.setCenter(0,0);
+      m.setLocation(0,0);
     }else{
-      int[] c=getCoorsForNewMandala(m);
-      m.setCenter(c[0],c[1]);}
+      ProspectiveMandalaLocation c=getLocationForNewMandala(m);
+      m.setLocation(c.x,c.y);}
     //
     mandalas.add(m);}
   
@@ -191,7 +192,7 @@ public class RModel{
    * pick one at random
    * 
    */
-  int[] getCoorsForNewMandala(Mandala_Abstract mnew){
+  ProspectiveMandalaLocation getLocationForNewMandala(Mandala_Abstract mnew){
     //get edge cells for all extant mandalas
     Set<Cell> mextedge=new HashSet<Cell>();
     for(Mandala_Abstract mext:mandalas)
@@ -201,56 +202,73 @@ public class RModel{
     //get all possible collisions between the extant mandala edge cells and the new mandala skin cells
     //the collision is defined by a set of coordinates for the new mandala. 
     //That is, if these 2 cells collide then the coordinates must be foo. Put foo in a list. 
-    List<int[]> locations0=new ArrayList<int[]>();
+    List<ProspectiveMandalaLocation> locations0=new ArrayList<ProspectiveMandalaLocation>();
     int dx,dy;
     for(Cell ce:mextedge){
       for(Cell cs:mnewskin){
         dx=ce.x-cs.x;
         dy=ce.y-cs.y;
-        locations0.add(new int[]{dx,dy});}}
+        locations0.add(new ProspectiveMandalaLocation(this,dx,dy));}}
     //cull all locations that would result in the new circle intersecting an extant circle
     double r0,r1;
-    int[] loc;
-    Iterator<int[]> i;
+    ProspectiveMandalaLocation loc;
+    Iterator<ProspectiveMandalaLocation> i;
     for(Mandala_Abstract m:mandalas){
-      r0=m.getRadius()+mnew.getRadius()+1;//our cells are 1x1. It ensures a proper distance.
+      r0=m.getRadius()+mnew.getRadius()+CELLSPAN;
       i=locations0.iterator();
       while(i.hasNext()){
         loc=i.next();
-        r1=GD.getDistance_PointPoint(loc[0],loc[1],m.getCenterX(),m.getCenterY());
+        r1=GD.getDistance_PointPoint(loc.x,loc.y,m.getCenterX(),m.getCenterY());
         if(r1<r0)i.remove();}}
     //now we (should) have a number of viable locations. pick the best ones
     //we want our location to put the mandala where it snuggles up closely to another mandala. Ideally several will be snuggled.
     //we want our location to put the mandala as close to the origin as possible.
     //so we need a rating system. Then we sort them by rating
-    Map<int[],Double> distancesbylocation=getDistances(locations0);
-    Map<int[],Integer> touchcountbylocation=getTouchcounts(locations0);
-    
+    Map<ProspectiveMandalaLocation,Double> distancetooriginbylocation=getDistancesToOrigin(locations0);
+    Map<ProspectiveMandalaLocation,Integer> touchcountbylocation=getTouchcounts(locations0,mnew);
+    Map<ProspectiveMandalaLocation,Double> ratingbyloction=ratelocations(distancetooriginbylocation,touchcountbylocation);
+    sortByRating(locations0,ratingbyloction);
+    locations0.//keep the best 3 and pick at random?
     //TEST
     Random rnd=new Random();
     return locations0.get(rnd.nextInt(locations0.size()));
     
   }
   
+  Map<ProspectiveMandalaLocation,Double> getDistancesToOrigin(List<ProspectiveMandalaLocation> locations0){
+    Map<ProspectiveMandalaLocation,Double> distancetooriginbylocation=new HashMap<ProspectiveMandalaLocation,Double>();
+    double d;
+    for(ProspectiveMandalaLocation p:locations0){
+      d=GD.getDistance_PointPoint(p.x,p.y,0,0);
+      distancetooriginbylocation.put(p,d);}
+    return distancetooriginbylocation;}
+  
   /*
-   * type may be null
-   * if it isn't null then we try to place it with disks of the same type
+   * for each loc
+   *   given the mandala there : m
+   *   given its edge cells : edge
+   *     for each cell in edge : ce
+   *     get the cells adjacent to it
+   *     put all those cell adjacents into a set : edgeadjacents
+   *   remove from edgeadjacents those cells that are in edge (obviously)
+   *   for each cell in edgeadjacents
+   *   if it is in the edge of any other mandala, put it in a set : touches
+   *   the size of touches is our touchcount
+   * 
    */
-//  void addDisk(PDisk disk,String type){
-//    //TEST
-//    RModelGridCoor location=null;
-////    if(type==null)
-////      location=getLocationForNewDisk(disk);
-////    else
-////      location=getLocationForNewDiskWithGrouping(disk,type);
-//    location=getPlacementForNewDiskWithoutGrouping(disk);
-//    if(location!=null){
-//      disk.setCenter(location);
-//      pdisks.add(disk);}
-    
-//  }
-  
-  
+  Map<ProspectiveMandalaLocation,Integer> getTouchcounts(List<ProspectiveMandalaLocation> locations0,Mandala_Abstract mnew){
+    Map<ProspectiveMandalaLocation,Integer> touchcountbylocation=new HashMap<ProspectiveMandalaLocation,Integer>();
+    Set<Cell> allextantedges=new HashSet<Cell>();
+    for(Mandala_Abstract m:mandalas)
+      allextantedges.addAll(m.getEdgeCells());
+    //
+    Set<Cell> mnewskin;
+    for(ProspectiveMandalaLocation loc:locations0){
+      mnew.setLocation(loc.x,loc.y);
+      mnewskin=mnew.getSkinCells();
+      mnewskin.retainAll(allextantedges);
+      touchcountbylocation.put(loc,mnewskin.size());}
+    return touchcountbylocation;}
   
   /*
    * ################################

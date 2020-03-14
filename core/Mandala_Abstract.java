@@ -54,7 +54,7 @@ public abstract class Mandala_Abstract{
   public int[] getCenter(){
     return new int[]{centerx,centery};}
   
-  public void setCenter(int x,int y){
+  public void setLocation(int x,int y){
     centerx=x;
     centery=y;
     edgecells=null;
