@@ -24,7 +24,7 @@ public abstract class Mandala_Abstract{
     birthday=rmodel.age;}
   
   public Mandala_Abstract(RModel rmodel,int radius){
-    this(rmodel,0,0,radius);}
+    this(rmodel,0,0,radius);}//note that we init to location 0,0
   
   /*
    * ################################
@@ -40,21 +40,54 @@ public abstract class Mandala_Abstract{
    * ################################
    */
   
-  public int centerx,centery,radius;
+  private int centerx,centery,radius;
   
-  Set<Cell> 
-    edgecells=null,//the cells at the edge of this mandala circle
-    skincells=null;//the cells adjacent to the edge cells outside the circle. we test them for collisions and such
+  public int getRadius(){
+    return radius;}
   
+  public int getCenterX(){
+    return centerx;}
+  
+  public int getCenterY(){
+    return centery;}
+  
+  public int[] getCenter(){
+    return new int[]{centerx,centery};}
+  
+  public void setCenter(int x,int y){
+    centerx=x;
+    centery=y;
+    edgecells=null;
+    skincells=null;}
+  
+  /*
+   * ################################
+   * EDGE CELLS
+   * Cell representation of the circle. A circle of square cells
+   * drawn by Bresenham's
+   * ################################
+   */
+  
+  private Set<Cell> edgecells=null;
+    
   public Set<Cell> getEdgeCells(){
    if(edgecells==null)initEdgeCells();
    return edgecells;}
   
   public void initEdgeCells(){
-    int[][] edgecellcoors=getCircleEdgeCellCoors(radius);
-    edgecells=new HashSet<Cell>(edgecellcoors.length);
-    for(int[] a:edgecellcoors)
+    int[][] preoffset=getCircleEdgeCellCoors(radius);
+    edgecells=new HashSet<Cell>(preoffset.length);
+    for(int[] a:preoffset)
       edgecells.add(new Cell(a[0]+centerx,a[1]+centery));}
+  
+  /*
+   * ################################
+   * SKIN CELLS
+   * the cells adjacent to the edge cells outside the circle. we use them for collision testing and such
+   * ################################
+   */
+  
+  private Set<Cell> skincells=null;
   
   public Set<Cell> getSkinCells(){
     if(skincells==null)initSkinCells();
@@ -110,12 +143,12 @@ public abstract class Mandala_Abstract{
    */
   
   /*
-   * lazy init bresenhams circles
+   * lazy init bresenham circles
    */
   
   private static Map<Integer,int[][]> edgecellsbyradius=new HashMap<Integer,int[][]>();
   
-  public static final int[][] getCircleEdgeCellCoors(int radius){
+  private static final int[][] getCircleEdgeCellCoors(int radius){
     int[][] c=edgecellsbyradius.get(radius);
     if(c==null){
       c=initCircleEdgeCellCoors(radius);
@@ -127,7 +160,7 @@ public abstract class Mandala_Abstract{
    * Then hold onto 1 for each radius (1,2,3... probably up to 7 or so)
    * thus we have pre-calculated that stuff
    */
-  public static final int[][] initCircleEdgeCellCoors(int radius){
+  private static final int[][] initCircleEdgeCellCoors(int radius){
     List<int[]> coors=new ArrayList<int[]>();
     int y=radius;
     int x=0;

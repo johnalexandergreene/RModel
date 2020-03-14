@@ -1,9 +1,15 @@
 package org.fleen.rModel.core;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import org.fleen.geom_2D.DPoint;
+import org.fleen.geom_2D.GD;
 
 /*
  * reality model
@@ -72,7 +78,7 @@ public class RModel{
   public RModel(){
     
     addMandala(new Mandala_Test(this,5));
-//    addMandala(new Mandala_Test(this,3));
+    addMandala(new Mandala_Test(this,3));
   }
   
   /*
@@ -112,6 +118,19 @@ public class RModel{
   
   public void advanceState(){
     incrementMandalaStates();
+    
+    //TEST
+    Random rnd=new Random();
+    mandalas.clear();
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    addMandala(new Mandala_Test(this,rnd.nextInt(6)+1));
+    
     observer.incrementedState();
     age++;}
   
@@ -131,6 +150,14 @@ public class RModel{
    * ################################
    * MANDALAS
    * Each represents a perceptual phenomenon
+   * They are animated little things
+   * They have a birth, a lifespan, a death. 
+   * Thus representing the rise, persistence and fall of perceptual pehnomena.
+   * 
+   * Our big trick is visually intelligible dynamic packing.
+   * When a new mandala is added to the system we need to put it someplace nice. 
+   * It needs to fit into the arrangement nicely. We might want to group it.
+   * 
    * ################################
    */
   
@@ -138,12 +165,10 @@ public class RModel{
   
   public void addMandala(Mandala_Abstract m){
     if(mandalas.isEmpty()){
-      m.centerx=0;
-      m.centery=0;
+      m.setCenter(0,0);
     }else{
       int[] c=getCoorsForNewMandala(m);
-      m.centerx=c[0];
-      m.centery=c[1];}
+      m.setCenter(c[0],c[1]);}
     //
     mandalas.add(m);}
   
@@ -151,11 +176,11 @@ public class RModel{
    * (TODO : also do a method to position adjacent to a subset. A group, by tag)
    * 
    * given our new mandala : mnew
-   * given all of the extant mandalas : mex
-   * get all of mex skin cells : mexskincells
-   * get all of new edge cells : medge
-   * for each cell in mexskincells : cmex
-   *   for each cell in medge : cedge
+   * given all of the extant mandalas : mext
+   * get all of mext edge cells : mextedge
+   * get all of the new mandala's skin cells : mnewskin
+   * for each cell in mextedge : ce
+   *   for each cell in mnewskin : cs
    *     get the center coors for mnew where cedge and cmex collide
    *     
    * now we're got a set of possible positions for the cnew : pos0
@@ -166,8 +191,45 @@ public class RModel{
    * pick one at random
    * 
    */
-  int[] getCoorsForNewMandala(Mandala_Abstract m){
-    return new int[]{2,3};//test
+  int[] getCoorsForNewMandala(Mandala_Abstract mnew){
+    //get edge cells for all extant mandalas
+    Set<Cell> mextedge=new HashSet<Cell>();
+    for(Mandala_Abstract mext:mandalas)
+      mextedge.addAll(mext.getEdgeCells());
+    //get all of the new mandala's skin cells
+    Set<Cell> mnewskin=mnew.getSkinCells();
+    //get all possible collisions between the extant mandala edge cells and the new mandala skin cells
+    //the collision is defined by a set of coordinates for the new mandala. 
+    //That is, if these 2 cells collide then the coordinates must be foo. Put foo in a list. 
+    List<int[]> locations0=new ArrayList<int[]>();
+    int dx,dy;
+    for(Cell ce:mextedge){
+      for(Cell cs:mnewskin){
+        dx=ce.x-cs.x;
+        dy=ce.y-cs.y;
+        locations0.add(new int[]{dx,dy});}}
+    //cull all locations that would result in the new circle intersecting an extant circle
+    double r0,r1;
+    int[] loc;
+    Iterator<int[]> i;
+    for(Mandala_Abstract m:mandalas){
+      r0=m.getRadius()+mnew.getRadius()+1;//our cells are 1x1. It ensures a proper distance.
+      i=locations0.iterator();
+      while(i.hasNext()){
+        loc=i.next();
+        r1=GD.getDistance_PointPoint(loc[0],loc[1],m.getCenterX(),m.getCenterY());
+        if(r1<r0)i.remove();}}
+    //now we (should) have a number of viable locations. pick the best ones
+    //we want our location to put the mandala where it snuggles up closely to another mandala. Ideally several will be snuggled.
+    //we want our location to put the mandala as close to the origin as possible.
+    //so we need a rating system. Then we sort them by rating
+    Map<int[],Double> distancesbylocation=getDistances(locations0);
+    Map<int[],Integer> touchcountbylocation=getTouchcounts(locations0);
+    
+    //TEST
+    Random rnd=new Random();
+    return locations0.get(rnd.nextInt(locations0.size()));
+    
   }
   
   /*

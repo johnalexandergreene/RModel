@@ -55,7 +55,7 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     
     //do transform
-    double dw=w,dh=h,scale=20;
+    double dw=w,dh=h,scale=10;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
     t.translate((dw/(2*scale)),(dh/(2*scale)));
@@ -73,15 +73,15 @@ public class Renderer{
       skin=m.getSkinCells();
     //
     g.setStroke(new BasicStroke((float)(1.0)));
-    g.setPaint(Color.red);
+    g.setPaint(new Color(255,0,0,64));
     for(Cell c:edge)
       g.drawLine(c.x,c.y,c.x,c.y);  
     //
-    g.setPaint(Color.green);
+    g.setPaint(new Color(0,255,0,64));
     for(Cell c:skin)
       g.drawLine(c.x,c.y,c.x,c.y);  
     //
-    double x=m.centerx,y=m.centery,r=m.radius;
+    double x=m.getCenterX(),y=m.getCenterY(),r=m.getRadius();
     g.setStroke(new BasicStroke((float)(2.0/g.getTransform().getScaleX())));
     g.setPaint(Color.black);
     Ellipse2D e=new Ellipse2D.Double(x-r,y-r,r*2,r*2);

@@ -2,5 +2,16 @@
 Mandala icons will ge tthe phenomenon-name on the edge
 something tasteful
 
+---
+
+prospective locations, loc int[] , should have their own class
+
+in it we'll have
+  distance to origin (closer is better)
+  number of points of contact with other mandalas (more is better)
+  rating
+  
+and it's implement comparable (by rating) 
+
 
 

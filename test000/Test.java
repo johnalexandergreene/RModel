@@ -85,7 +85,7 @@ public class Test{
     for(int i=0;i<FRAMECOUNT;i++){
       test.rmodel.advanceState();
      try{
-      Thread.sleep(500);
+      Thread.sleep(1000);
      }catch(Exception x){};}}
     
 }
