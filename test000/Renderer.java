@@ -11,9 +11,12 @@ import java.util.HashMap;
 import java.util.Set;
 
 import org.fleen.rModel.core.Cell;
-import org.fleen.rModel.core.Mandala_Abstract;
+import org.fleen.rModel.core.Mandala_Basic;
+import org.fleen.rModel.core.Mandala_Red;
 
 public class Renderer{
+  
+  //RENDERING HINTS
   
   public static final HashMap<RenderingHints.Key,Object> RENDERING_HINTS=
       new HashMap<RenderingHints.Key,Object>();
@@ -24,7 +27,7 @@ public class Renderer{
     RENDERING_HINTS.put(
       RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
     RENDERING_HINTS.put(
-      RenderingHints.KEY_DITHERING,RenderingHints.VALUE_DITHER_DISABLE);
+      RenderingHints.KEY_DITHERING,RenderingHints.VALUE_DITHER_ENABLE);
     RENDERING_HINTS.put(
       RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
     RENDERING_HINTS.put(
@@ -34,12 +37,16 @@ public class Renderer{
     RENDERING_HINTS.put(
       RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);}
   
+  //
+  
   Renderer(Test test){
     this.test=test;}
   
   Test test;
   
   BufferedImage image;
+  
+  public static final Color BACKGROUNDCOLOR=new Color(154,113,23);
   
   static final int DEFAULT_VIEWPORT_SPAN=600;
   
@@ -51,7 +58,7 @@ public class Renderer{
     image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
     Graphics2D g=image.createGraphics();
     g.setRenderingHints(RENDERING_HINTS);
-    g.setPaint(Color.white);
+    g.setPaint(BACKGROUNDCOLOR);
     g.fillRect(0,0,w,h);
     
     //do transform
@@ -61,31 +68,32 @@ public class Renderer{
     t.translate((dw/(2*scale)),(dh/(2*scale)));
     g.setTransform(t);
     //
-    for(Mandala_Abstract m:test.rmodel.mandalas)
-      renderMandala(g,m);
+    for(Mandala_Basic m:test.rmodel.mandalas)
+      if(m instanceof Mandala_Red)
+        ((Mandala_Red)m).render(image,g);
       
   }
   
-  private void renderMandala(Graphics2D g,Mandala_Abstract m){
-    System.out.println("rendering a mandala");
-    Set<Cell> 
-      edge=m.getEdgeCells(),
-      skin=m.getSkinCells();
-    //
-    g.setStroke(new BasicStroke((float)(1.0)));
-    g.setPaint(new Color(255,0,0,64));
-    for(Cell c:edge)
-      g.drawLine(c.x,c.y,c.x,c.y);  
-    //
-    g.setPaint(new Color(0,255,0,64));
-    for(Cell c:skin)
-      g.drawLine(c.x,c.y,c.x,c.y);  
-    //
-    double x=m.getCenterX(),y=m.getCenterY(),r=m.getRadius();
-    g.setStroke(new BasicStroke((float)(2.0/g.getTransform().getScaleX())));
-    g.setPaint(Color.black);
-    Ellipse2D e=new Ellipse2D.Double(x-r,y-r,r*2,r*2);
-    g.draw(e);}
+//  private void renderMandala(Graphics2D g,Mandala_Basic m){
+//    System.out.println("rendering a mandala");
+//    Set<Cell> 
+//      edge=m.getEdgeCells(),
+//      skin=m.getSkinCells();
+//    //
+//    g.setStroke(new BasicStroke((float)(1.0)));
+//    g.setPaint(new Color(255,0,0,64));
+//    for(Cell c:edge)
+//      g.drawLine(c.x,c.y,c.x,c.y);  
+//    //
+//    g.setPaint(new Color(0,255,0,64));
+//    for(Cell c:skin)
+//      g.drawLine(c.x,c.y,c.x,c.y);  
+//    //
+//    double x=m.cx,y=m.cy,r=m.radius;
+//    g.setStroke(new BasicStroke((float)(2.0/g.getTransform().getScaleX())));
+//    g.setPaint(Color.black);
+//    Ellipse2D e=new Ellipse2D.Double(x-r,y-r,r*2,r*2);
+//    g.draw(e);}
     
 //    //do transform
 //    double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;

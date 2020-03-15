@@ -34,7 +34,7 @@ public class Test{
       System.out.println("incremented state");
       renderer.render();
       ui.repaint();
-      exporter.export();
+//      exporter.export();
       }};
       
   /*
@@ -78,7 +78,7 @@ public class Test{
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
    */
   
-  public static final int SPAN=400,FRAMECOUNT=200;
+  public static final int FRAMECOUNT=1200;
   
   public static final void main(String[] a){
     Test test=new Test();

@@ -8,7 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Mandala_Abstract{
+import org.fleen.geom_2D.GD;
+
+/*
+ * Base mandala class
+ * Just the geometry
+ * Used for testing the system
+ * Also used for testing geometry in the dynamic circle packing thingy
+ */
+public class Mandala_Basic{
   
   /*
    * ################################
@@ -16,15 +24,14 @@ public abstract class Mandala_Abstract{
    * ################################
    */
   
-  public Mandala_Abstract(RModel rmodel,int centerx,int centery,int radius){
+  public Mandala_Basic(RModel rmodel,int centerx,int centery,int radius){
     this.rmodel=rmodel;
-    this.centerx=centerx;
-    this.centery=centery;
-    this.radius=radius;
-    birthday=rmodel.age;}
+    this.cx=centerx;
+    this.cy=centery;
+    this.radius=radius;}
   
-  public Mandala_Abstract(RModel rmodel,int radius){
-    this(rmodel,0,0,radius);}//note that we init to location 0,0
+  public Mandala_Basic(RModel rmodel,int radius){
+    this(rmodel,0,0,radius);}
   
   /*
    * ################################
@@ -40,25 +47,32 @@ public abstract class Mandala_Abstract{
    * ################################
    */
   
-  private int centerx,centery,radius;
+  public int cx,cy,radius;
   
-  public int getRadius(){
-    return radius;}
-  
-  public int getCenterX(){
-    return centerx;}
-  
-  public int getCenterY(){
-    return centery;}
-  
-  public int[] getCenter(){
-    return new int[]{centerx,centery};}
-  
+  /*
+   * note that we invalidate the cell sets when we do this
+   */
   public void setLocation(int x,int y){
-    centerx=x;
-    centery=y;
+    cx=x;
+    cy=y;
     edgecells=null;
     skincells=null;}
+  
+  public double getDistanceToOrigin(){
+    double d=GD.getDistance_PointPoint(cx,cy,0,0);
+    return d;}
+  
+  /*
+   * returns true if this mandala circle is in a state of collision with any mandala in the rmodel
+   * if the distance between centers is less than radius+radius+CELLSPAN then it's collision
+   */
+  public boolean isColliding(){
+    double r0,r1;
+    for(Mandala_Basic m:rmodel.mandalas){
+      r0=m.radius+radius+RModel.CELLSPAN;//note our carefully tweaked padding
+      r1=GD.getDistance_PointPoint(cx,cy,m.cx,m.cy);
+      if(r1<r0)return true;}
+    return false;}
   
   /*
    * ################################
@@ -78,12 +92,13 @@ public abstract class Mandala_Abstract{
     int[][] preoffset=getCircleEdgeCellCoors(radius);
     edgecells=new HashSet<Cell>(preoffset.length);
     for(int[] a:preoffset)
-      edgecells.add(new Cell(a[0]+centerx,a[1]+centery));}
+      edgecells.add(new Cell(a[0]+cx,a[1]+cy));}
   
   /*
    * ################################
    * SKIN CELLS
-   * the cells adjacent to the edge cells outside the circle. we use them for collision testing and such
+   * the cells adjacent to the edge cells on the outside of the circle. 
+   * we use them for collision testing.
    * ################################
    */
   
@@ -106,46 +121,47 @@ public abstract class Mandala_Abstract{
     for(Cell c:ec)
       skincells.addAll(c.getAdjacents());
     skincells.removeAll(edgecells);
-    removeInsideCells(skincells);}
+    sc_RemoveInsideCells(skincells);}
   
-  private void removeInsideCells(Set<Cell> skincells){
+  private void sc_RemoveInsideCells(Set<Cell> skincells){
     Iterator<Cell> i=skincells.iterator();
     Cell c;
     while(i.hasNext()){
       c=i.next();
-      if(isInside(c))
+      if(sc_IsInside(c))
         i.remove();}}
   
-  private boolean isInside(Cell c){
-    double a=c.center.getDistance(centerx,centery);
+  private boolean sc_IsInside(Cell c){
+    double a=c.center.getDistance(cx,cy);
     boolean b=a<radius;
     return b;}
   
   /*
-   * ################################
-   * STATE
-   * ################################
+   * MANDALAS TOUCHING EACH OTHER
+   * This calculates how many times this mandala touches other mandalas
+   * This mandala is probably being used for location testing so it isn't actually in the model
+   * get set of all cells of all edges of all mandalas in the rmodel : extantedges
+   * get set of all cells in this mandala's skin : skin
+   * if a cell is in both sets then that's a touch
+   * count those cells
    */
-  
-  public int birthday;
-  
-  public int getAge(){
-    return rmodel.age=birthday;}
-  
-  public abstract void incrementState();
-  
-  public abstract boolean destroyMe();
+  public int getTouchCount(){
+    Set<Cell> extantedges=new HashSet<Cell>();
+    for(Mandala_Basic m:rmodel.mandalas)
+      extantedges.addAll(m.getEdgeCells());
+    Set<Cell> skin=new HashSet<Cell>(getSkinCells());
+    skin.retainAll(extantedges);
+    return skin.size();}
   
   /*
    * ################################
-   * STATIC GEOMETRY
+   * STATIC BRESENHAM GEOMETRY
    * ################################
    */
   
   /*
    * lazy init bresenham circles
    */
-  
   private static Map<Integer,int[][]> edgecellsbyradius=new HashMap<Integer,int[][]>();
   
   private static final int[][] getCircleEdgeCellCoors(int radius){
@@ -168,9 +184,9 @@ public abstract class Mandala_Abstract{
     while(y>=x){
       getCoorAndReflect(x,y,coors);
       if(delta<0) {
-        delta = calculateDeltaForHorizontalPixel(delta, x);
+        delta=calculateDeltaForHorizontalPixel(delta, x);
       }else{
-        delta = calculateDeltaForDiagonalPixel(delta, x, y);
+        delta=calculateDeltaForDiagonalPixel(delta, x, y);
         y--;}
       x++;}
     int[][] coorsa=coors.toArray(new int[coors.size()][2]);
@@ -179,11 +195,11 @@ public abstract class Mandala_Abstract{
   private static int calculateStartDelta(int radius){
     return 3-2*radius;}
 
-  private static int calculateDeltaForHorizontalPixel(int oldDelta,int x){
-    return oldDelta+4*x+6;}
+  private static int calculateDeltaForHorizontalPixel(int olddelta,int x){
+    return olddelta+4*x+6;}
 
-  private static int calculateDeltaForDiagonalPixel(int oldDelta,int x,int y) {
-    return oldDelta+4*(x-y)+10;}
+  private static int calculateDeltaForDiagonalPixel(int olddelta,int x,int y) {
+    return olddelta+4*(x-y)+10;}
 
   private static void getCoorAndReflect(int x,int y,List<int[]> coors){
     coors.add(new int[]{x,y});
