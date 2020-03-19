@@ -46,7 +46,7 @@ public class Renderer{
   
   BufferedImage image;
   
-  public static final Color BACKGROUNDCOLOR=new Color(154,113,222);
+  public static final Color BACKGROUNDCOLOR=new Color(255,255,255);
   
   static final int DEFAULT_VIEWPORT_SPAN=600;
   

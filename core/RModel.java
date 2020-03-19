@@ -104,7 +104,7 @@ public class RModel{
     }
     
     
-    if(mandalas.size()<8)
+    if(mandalas.size()<18)
       addMandala(new Mandala_Red(this,0,0,rnd.nextInt(6)+1));
     
     
