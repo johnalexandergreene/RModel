@@ -62,7 +62,7 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     
     //do transform
-    double dw=w,dh=h,scale=10;
+    double dw=w,dh=h,scale=20;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
     t.translate((dw/(2*scale)),(dh/(2*scale)));
@@ -75,16 +75,11 @@ public class Renderer{
   }
     
   void renderSquare(Graphics2D g,Square_PP_Abstract s){
-    DPoint[] cp=s.getCornerPoints();
-    Path2D.Double path=new Path2D.Double();
-    path.moveTo(cp[0].x,cp[0].y);
-    path.lineTo(cp[1].x,cp[1].y);
-    path.lineTo(cp[2].x,cp[2].y);
-    path.lineTo(cp[3].x,cp[3].y);
-    path.closePath();
+    Path2D.Double path=s.getEdgePath();
     g.setPaint(s.getColor());
     g.fill(path);
-    Stroke t=new BasicStroke((float)(3.0/g.getTransform().getScaleX()));
+    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
+    g.setStroke(t);
     g.setPaint(Color.white);
     g.draw(path);
     
@@ -92,26 +87,6 @@ public class Renderer{
     
   }
   
-//  private void renderMandala(Graphics2D g,Mandala_Basic m){
-//    System.out.println("rendering a mandala");
-//    Set<Cell> 
-//      edge=m.getEdgeCells(),
-//      skin=m.getSkinCells();
-//    //
-//    g.setStroke(new BasicStroke((float)(1.0)));
-//    g.setPaint(new Color(255,0,0,64));
-//    for(Cell c:edge)
-//      g.drawLine(c.x,c.y,c.x,c.y);  
-//    //
-//    g.setPaint(new Color(0,255,0,64));
-//    for(Cell c:skin)
-//      g.drawLine(c.x,c.y,c.x,c.y);  
-//    //
-//    double x=m.cx,y=m.cy,r=m.radius;
-//    g.setStroke(new BasicStroke((float)(2.0/g.getTransform().getScaleX())));
-//    g.setPaint(Color.black);
-//    Ellipse2D e=new Ellipse2D.Double(x-r,y-r,r*2,r*2);
-//    g.draw(e);}
     
 //    //do transform
 //    double dw=w,dh=h,scale=((double)DEFAULT_VIEWPORT_SPAN)/test.rmodel.scale;

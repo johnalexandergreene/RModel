@@ -78,14 +78,14 @@ public class Test{
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
    */
   
-  public static final int FRAMECOUNT=3000;
+  public static final int FRAMECOUNT=1000;
   
   public static final void main(String[] a){
     Test test=new Test();
     for(int i=0;i<FRAMECOUNT;i++){
       test.rmodel.advanceState();
      try{
-      Thread.sleep(10);
+      Thread.sleep(1000);
      }catch(Exception x){};}}
     
 }

@@ -1,5 +1,6 @@
 package org.fleen.rModel.core;
 
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +54,22 @@ public class Square_Minimal{
     cp[3]=new DPoint(x*RModel.CELLSPAN+span*RModel.CELLSPAN,y*RModel.CELLSPAN);
     return cp;}
   
+  Path2D.Double edgepath=null;
+  
+  public Path2D.Double getEdgePath(){
+    if(edgepath==null)
+      initEdgePath();
+    return edgepath;}
+  
+  private void initEdgePath(){
+    edgepath=new Path2D.Double();
+    DPoint[] cp=getCornerPoints();
+    edgepath.moveTo(cp[0].x,cp[0].y);
+    edgepath.lineTo(cp[1].x,cp[1].y);
+    edgepath.lineTo(cp[2].x,cp[2].y);
+    edgepath.lineTo(cp[3].x,cp[3].y);
+    edgepath.closePath();}
+  
   /*
    * ################################
    * CELLS
@@ -87,7 +104,7 @@ public class Square_Minimal{
    * a square has a number of edge cells on each side equal to span+2; 
    */
   private void initSkin(){
-    edge=getSquare(x-1,y-1,span+2);}
+    skin=getSquare(x-1,y-1,span+2);}
   
   /*
    * --------------------------------
@@ -129,6 +146,14 @@ public class Square_Minimal{
    * OBJECT
    * ################################
    */
+  
+  public int hashCode(){
+    return x*53+y*59+span*61;}
+  
+  public boolean equals(Object a){
+    Square_Minimal b=(Square_Minimal)a;
+    boolean e=(x==b.x)&&(y==b.y)&&(span==b.span);
+    return e;}
   
   public String toString(){
     String a="["+x+","+y+","+span+"]";
