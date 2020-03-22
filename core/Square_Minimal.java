@@ -3,6 +3,8 @@ package org.fleen.rModel.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fleen.geom_2D.DPoint;
+
 public class Square_Minimal{
   
   /*
@@ -41,6 +43,15 @@ public class Square_Minimal{
     this.y=y;
     edge=null;
     skin=null;}
+  
+  //sw,nw,ne,se
+  public DPoint[] getCornerPoints(){
+    DPoint[] cp=new DPoint[4];
+    cp[0]=new DPoint(x*RModel.CELLSPAN,y*RModel.CELLSPAN);
+    cp[1]=new DPoint(x*RModel.CELLSPAN,y*RModel.CELLSPAN+span*RModel.CELLSPAN);
+    cp[2]=new DPoint(x*RModel.CELLSPAN+span*RModel.CELLSPAN,y*RModel.CELLSPAN+span*RModel.CELLSPAN);
+    cp[3]=new DPoint(x*RModel.CELLSPAN+span*RModel.CELLSPAN,y*RModel.CELLSPAN);
+    return cp;}
   
   /*
    * ################################

@@ -1,5 +1,7 @@
 package org.fleen.rModel.core;
 
+import java.awt.Color;
+
 public abstract class Square_PP_Abstract extends Square_Minimal{
 
   /*
@@ -39,11 +41,26 @@ public abstract class Square_PP_Abstract extends Square_Minimal{
    */
   
   /*
-   * governs zoom, alpha, maybe some other video (or even autio TODO) effect.
+   * governs zoom, alpha, maybe some other video (or even audio TODO) effect.
+   * Range [0,1]
+   * This will be a function of lifespan
+   * a ramp up at the beginning, a persistence value (probably 1.0) and then a ramp down
    */
   public abstract double getIntensity();
   
+  /*
+   * to distinguish it from the other species
+   */
+  public abstract Color getColor();
   
+  /*
+   * printed on the icon 
+   */
+  public abstract String getTitle();
   
+  /*
+   * Used in the narrative stream 
+   */
+  public abstract String getNarrative();
   
 }

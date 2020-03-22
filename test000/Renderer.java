@@ -4,15 +4,15 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Set;
 
-import org.fleen.rModel.core.Cell;
-import org.fleen.rModel.core.Mandala_Basic;
-import org.fleen.rModel.core.Mandala_Red;
+import org.fleen.geom_2D.DPoint;
+import org.fleen.rModel.core.Square_Minimal;
+import org.fleen.rModel.core.Square_PP_Abstract;
 
 public class Renderer{
   
@@ -68,10 +68,28 @@ public class Renderer{
     t.translate((dw/(2*scale)),(dh/(2*scale)));
     g.setTransform(t);
     //
-    for(Mandala_Basic m:test.rmodel.mandalas)
-      if(m instanceof Mandala_Red)
-        ((Mandala_Red)m).render(image,g);
+    for(Square_Minimal s:test.rmodel.squares)
+      if(s instanceof Square_PP_Abstract)
+        renderSquare(g,(Square_PP_Abstract)s);
       
+  }
+    
+  void renderSquare(Graphics2D g,Square_PP_Abstract s){
+    DPoint[] cp=s.getCornerPoints();
+    Path2D.Double path=new Path2D.Double();
+    path.moveTo(cp[0].x,cp[0].y);
+    path.lineTo(cp[1].x,cp[1].y);
+    path.lineTo(cp[2].x,cp[2].y);
+    path.lineTo(cp[3].x,cp[3].y);
+    path.closePath();
+    g.setPaint(s.getColor());
+    g.fill(path);
+    Stroke t=new BasicStroke((float)(3.0/g.getTransform().getScaleX()));
+    g.setPaint(Color.white);
+    g.draw(path);
+    
+      
+    
   }
   
 //  private void renderMandala(Graphics2D g,Mandala_Basic m){
