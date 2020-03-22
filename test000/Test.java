@@ -34,7 +34,7 @@ public class Test{
       System.out.println("incremented state");
       renderer.render();
       ui.repaint();
-      exporter.export();
+//      exporter.export();
       }};
       
   /*

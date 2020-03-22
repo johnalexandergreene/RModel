@@ -15,27 +15,37 @@ import org.fleen.geom_2D.DPoint;
 
 /*
  * reality model
- * a bunch of square icons representing perceptual phenomena
- * taken together, as a pattern, represents a whole river perceptual phenomena. Ie reality.
+ * a bunch of mandalas representing perceptual phenomena
+ * taken together, as a pattern of disks, represents a whole river perceptual phenomena. Ie reality.
  * 
- * So we have these perceptual phenomenon squares : class PPSquare
- * A PPSquare appears somewhere in the perspective. 
- *   It's appears. A colored square. 
- *   It fades in, persists, fades out. The duration of the fading is arbitrary, rresembling the phenomenon somewhat.
- *     (Example 1 : a "dog bark" will fade-zoom in quicky, persist for a moment, and immediately fade-zoom out.)
- *     (Example 2 : a "Car sound" will slowly fade-zoom in, persist for a mement, and then slowly fade-zoom out.)
- *   It will have a name, or an initial.
- *   It will have a color corresponding to sight, sound, thought etc.
- * Another PPSquare may appear, then another.
- * PPSquares will group by sense.
- * PPSquare size corresponds to intensity.
- * Fading in and out correspond to rise and fall in intensity.
- * Intensity corresponds to size and alpha.
+ * Each disk represents a particular perceptual pehnomenon.
+ * For example, sonsider these symbolis representations
+ *   Green circle = a sound, like the quack of a duck, or the roar of a car engine
+ *   A pink circle = a sight. A vicual pehnomenon. Something seen. Like the sight of a kittycat, or seeing the moon, 
+ *     or seeing a character on the screen.  
+ *   A blue rectangle = a thought. A thought about a hamburger, or about money, or about that person over there
  * 
- * Each group of sense squares will build in a certain direction, constrained to an angle-section from the origin.
- *   
+ * So when you see a green circle appear on the screen, that's the roar of a car going by.
+ * 
+ * Disks will come and go. Arriving when the phenomenon begins, leaving when the phenomenon is over.
+ * A disk grows from a point and fades into visiblity when it enters the stage
+ * The disk shrinks to a point and fades from visibility when it leaves
+ * 
+ * Disks will be sized according to their intensity.
+ * So the sight of the noon sun might be a huge pink circle
+ * And the sight of a man in a window a block away in a a small pink circle
+ * And the blat of an air-horn is a big green circle 
+ * And an overwhelming thought about sex is a huge blue rectangle  
+ * 
+ * Disks will be rendered with nicely scribbly edges and a bit of a throb or pulse, the lend sharacter and appeal.
+ * 
+ * So anyway, our RModel here contains a number of these PDisks
+ * 
+ * When a PDisk arrives
+ *   1. find a nice location for it
+ *   2. Fade it in one frame at a time, keep it for a while, then fade it out
  */
-public class RModel{
+public class RModelOLD{
   
   /*
    * ################################
@@ -43,7 +53,7 @@ public class RModel{
    * ################################
    */
   
-  public RModel(){}
+  public RModelOLD(){}
   
   /*
    * ################################
@@ -81,9 +91,7 @@ public class RModel{
   public int age=0;
   
   public void advanceState(){
-    //increment PPSquare states
-    for(Mandala_Basic m:mandalas)
-      if(m instanceof Mandala_PP)((Mandala_PP)m).incrementState();
+    incrementMandalaStates();
     
     //TEST
     Iterator<Mandala_Basic> i=mandalas.iterator();
@@ -103,6 +111,9 @@ public class RModel{
     observer.incrementedState();
     age++;}
   
+  void incrementMandalaStates(){
+    for(Mandala_Basic m:mandalas)
+      if(m instanceof Mandala_PP)((Mandala_PP)m).incrementState();}
   
   /*
    * ################################

@@ -35,6 +35,7 @@ public class Mandala_Red extends Mandala_PP{
     return false;}
 
   public void render(BufferedImage i,Graphics2D g){
+    //ramp radius at birth and death
     double paddedradius=radius+0.5;
     double displayradius=paddedradius;
     int age=getAge();
@@ -42,9 +43,11 @@ public class Mandala_Red extends Mandala_PP{
       displayradius=paddedradius*((double)age)/((double)radiusramp);
     }else if(age>(lifespan-radiusramp)){
       displayradius=paddedradius*((double)(lifespan-age))/((double)radiusramp);}
-    //
-    int alpha=(int)((((double)displayradius)/((double)paddedradius))*((double)255));
-    //
+    //ramp alpha too. And curve it. 
+    double a=((double)displayradius)/((double)paddedradius);
+    a*=a;
+    int alpha=(int)(a*((double)255));
+    //draw it
     Ellipse2D.Double e=new Ellipse2D.Double(
       cx-displayradius,
       cy-displayradius,
@@ -52,8 +55,6 @@ public class Mandala_Red extends Mandala_PP{
       displayradius*2);
       g.setPaint(new Color(255,0,0,alpha));
       g.fill(e);
-    System.out.println("displayradius="+displayradius);
-    System.out.println("STROKETHICKNESS="+STROKETHICKNESS);
     if(displayradius>STROKETHICKNESS){
       e=new Ellipse2D.Double(
         cx-(displayradius-STROKETHICKNESS),
