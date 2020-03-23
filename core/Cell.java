@@ -18,6 +18,19 @@ public class Cell{
     this.y=y;
     center=new DPoint(x,y);}
   
+  public DPoint getCenter(){
+    return new DPoint(x+0.5,y+0.5);}
+  
+  double distancetoorigin=-1;
+  
+  public double getDistanceToOrigin(){
+    if(distancetoorigin==-1)
+      initDistanceToOrigin();
+    return distancetoorigin;}
+  
+  private void initDistanceToOrigin(){
+    distancetoorigin=getCenter().getDistance(0,0);}
+  
   /*
    * ################################
    * GEOMETRY
@@ -46,7 +59,7 @@ public class Cell{
    */
   
   public int hashCode(){
-    return x+23*y;}
+    return x*43+y*47;}
   
   public boolean equals(Object a){
     Cell b=(Cell)a;

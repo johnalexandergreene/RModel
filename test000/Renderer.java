@@ -74,18 +74,37 @@ public class Renderer{
       
   }
     
-  void renderSquare(Graphics2D g,Square_PP_Abstract s){
+  void renderSquarez(Graphics2D g,Square_PP_Abstract s){
     Path2D.Double path=s.getEdgePath();
     g.setPaint(s.getColor());
     g.fill(path);
     Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
     g.setStroke(t);
     g.setPaint(Color.white);
-    g.draw(path);
-    
-      
-    
-  }
+    g.draw(path);}
+  
+  void renderSquare(Graphics2D g,Square_PP_Abstract s){
+    DPoint center=s.getCenter();
+    double span=s.span*s.getIntensity();
+    double[][] c={
+      {center.x-span/2,center.y-span/2},
+      {center.x-span/2,center.y+span/2},
+      {center.x+span/2,center.y+span/2},
+      {center.x+span/2,center.y-span/2}};
+    //
+    Path2D.Double path=new Path2D.Double();
+    path.moveTo(c[0][0],c[0][1]);
+    path.lineTo(c[1][0],c[1][1]);
+    path.lineTo(c[2][0],c[2][1]);
+    path.lineTo(c[3][0],c[3][1]);
+    path.closePath();
+    //
+    g.setPaint(s.getColor());
+    g.fill(path);
+    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
+    g.setStroke(t);
+    g.setPaint(Color.white);
+    g.draw(path);}
   
     
 //    //do transform

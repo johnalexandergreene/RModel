@@ -3,7 +3,7 @@ package org.fleen.rModel.core;
 import java.awt.Color;
 import java.util.Random;
 
-public class Square_PP_Red extends Square_PP_Abstract{
+public class Square_PP_Yellow extends Square_PP_Abstract{
 
   /*
    * ################################
@@ -11,10 +11,10 @@ public class Square_PP_Red extends Square_PP_Abstract{
    * ################################
    */
   
-  public Square_PP_Red(RModel rmodel,int x,int y,int span){
+  public Square_PP_Yellow(RModel rmodel,int x,int y,int span){
     super(rmodel,x,y,span);}
   
-  public Square_PP_Red(RModel rmodel,int span){
+  public Square_PP_Yellow(RModel rmodel,int span){
     super(rmodel,span);
     Random rnd=new Random();
     maxage=rnd.nextInt(100)+30;}
@@ -47,16 +47,16 @@ public class Square_PP_Red extends Square_PP_Abstract{
     return 1.0;}
 
   public Color getColor(){
-    return Color.red;}
+    return Color.yellow;}
   
-  public static final String NAME="Red";
+  public static final String NAME="Yellow";
   
   public String getName(){
     return NAME;
   }
 
   public String getNarrative(){
-    return "A wild Red appears.";
+    return "A wild Yellow appears.";
   }
 
 }

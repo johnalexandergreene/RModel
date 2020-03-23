@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fleen.geom_2D.DPoint;
+import org.fleen.geom_2D.GD;
 
 public class Square_Minimal{
   
@@ -70,13 +71,33 @@ public class Square_Minimal{
     edgepath.lineTo(cp[3].x,cp[3].y);
     edgepath.closePath();}
   
+  public DPoint getCenter(){
+    DPoint[] c=getCornerPoints();
+    double[] a=GD.getPoint_Mid2Points(c[0].x,c[0].y,c[2].x,c[2].y);
+    return new DPoint(a);}
+  
   /*
    * ################################
    * CELLS
    * ################################
    */
   
-  //EDGE
+  //CELLS
+  //includes edge but not skin
+  private List<Cell> cells=null;
+  
+  public List<Cell> getCells(){
+    if(cells==null)
+      initCells();
+    return cells;}
+  
+  private void initCells(){
+    cells=new ArrayList<Cell>(span*2);
+    for(int cx=x;cx<x+span;cx++){
+      for(int cy=y;cy<y+span;cy++){
+        cells.add(new Cell(cx,cy));}}}
+  
+  //EDGE 
   private List<Cell> edge=null;
   
   public List<Cell> getEdge(){

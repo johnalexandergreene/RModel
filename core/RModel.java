@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.fleen.geom_2D.DPoint;
+import org.fleen.geom_2D.GD;
 
 /*
  * reality model
@@ -44,9 +45,9 @@ public class RModel{
    */
   
   public RModel(){
-    addSquare(new Square_PP_Red(this,8));
-    addSquare(new Square_PP_Red(this,8));
-    
+    clumpangles.put(Square_PP_Red.NAME,0.0);
+    clumpangles.put(Square_PP_Yellow.NAME,GD.PI2/3);
+    clumpangles.put(Square_PP_Blue.NAME,(GD.PI2/3)*2);
     
   }
   
@@ -57,6 +58,8 @@ public class RModel{
    */
   
   public static final double CELLSPAN=1.0;
+  
+  Map<String,Double> clumpangles=new HashMap<String,Double>();
   
   /*
    * ################################
@@ -86,13 +89,24 @@ public class RModel{
   public int age=0;
   
   public void advanceState(){
-
-    
-    squares.clear();
-    for(int i=0;i<8;i++)
-      addSquare(new Square_PP_Red(this,rnd.nextInt(4)+1));
-    
-    
+    //remove dead
+    Square_PP_Abstract square;
+    Iterator<Square_PP_Abstract> i=squares.iterator();
+    while(i.hasNext()){
+      square=i.next();
+      if(square.destroyMe())
+        i.remove();}
+    //
+    int r;
+    if(squares.size()<8){
+      r=rnd.nextInt(3);
+      if(r==0){
+        addSquare(new Square_PP_Red(this,rnd.nextInt(3)+1));
+      }else if(r==1){
+        addSquare(new Square_PP_Yellow(this,rnd.nextInt(3)+1));
+      }else{
+        addSquare(new Square_PP_Blue(this,rnd.nextInt(3)+1));}}
+    //   
     observer.incrementedState();
     age++;}
   
@@ -111,12 +125,12 @@ public class RModel{
    * ################################
    */
   
-  public List<Square_Minimal> squares=new ArrayList<Square_Minimal>();
+  public List<Square_PP_Abstract> squares=new ArrayList<Square_PP_Abstract>();
   
   /*
    * TODO make this work with type cone placement 
    */
-  public void addSquare(Square_Minimal newsquare){
+  public void addSquare(Square_PP_Abstract newsquare){
     if(squares.isEmpty()){ 
       newsquare.setLocation(0,0);
     }else{
@@ -139,67 +153,57 @@ public class RModel{
    * ################################
    */
   
-  private void setLocationForNewSquare(Square_Minimal newsquare){
-    //get the edges of all extant squares. we use it for a few things
-    Set<Cell> extantedges=new HashSet<Cell>();
-    for(Square_Minimal s:squares)
-      extantedges.addAll(s.getEdge());
+  private void setLocationForNewSquare(Square_PP_Abstract newsquare){
+    Set<Square_Minimal> rawprospects=getRawProspects(newsquare);
+    cullCollisions(rawprospects);
+    if(rawprospects.isEmpty())throw new IllegalArgumentException("no raw prospects");
+    Map<Square_Minimal,Double> ratings=rateProspects(rawprospects,newsquare);
     //
-    Set<Square_Minimal> prospects=getRawProspects(extantedges,newsquare);
+    List<Square_Minimal> orderedprospects=new ArrayList<Square_Minimal>(rawprospects);
+    Collections.sort(orderedprospects,new ProspectComparator(ratings));
     //
-    cullCollisions(prospects);
-    
-    //test
-    List<Square_Minimal> foo=new ArrayList<Square_Minimal>(prospects);
-    int a=rnd.nextInt(prospects.size());
-    Square_Minimal b=foo.get(a);
-    newsquare.setLocation(b.x,b.y);
-    
-  }
-  
-//  /*
-//   * for each prospect
-//   * does its edge collide with any extant edge 
-//   */
-//  private void cullCollisions(Set<Cell> extantedges,Set<Square_Minimal> prospects){
-//    Iterator<Square_Minimal> i=prospects.iterator();
-//    Square_Minimal prospect;
-//    Set<Cell> testprospectedge;
-//    while(i.hasNext()){
-//      prospect=i.next();
-//      testprospectedge=new HashSet<Cell>(prospect.getEdge());
-//      testprospectedge.retainAll(extantedges);
-//      if(!testprospectedge.isEmpty())
-//        i.remove();}}
+    Square_Minimal b=orderedprospects.get(0);//top rated.
+    newsquare.setLocation(b.x,b.y);}
   
   /*
+   * test for collision between newsquare and all extant squares
+   * 
+   * get the set of all cells in all extant squares : extantcells
    * for each prospect
-   * does it collide any extant square?
-   * test corner point interiority
+   * get its cell set : prospectcells
+   * if prospectcells contains any cell in extantcells then collision 
    */
   private void cullCollisions(Set<Square_Minimal> prospects){
+    Set<Cell> extant=new HashSet<Cell>();
+    for(Square_Minimal s:squares)
+      extant.addAll(s.getCells());
+    //
     Iterator<Square_Minimal> i=prospects.iterator();
     Square_Minimal prospect;
+    Set<Cell> test;
     while(i.hasNext()){
       prospect=i.next();
-      if(collides(prospect))
+      test=new HashSet<Cell>(prospect.getCells());
+      test.retainAll(extant);
+      if(!test.isEmpty())
         i.remove();}}
-  
-  private boolean collides(Square_Minimal prospect){
-    DPoint[] cp=prospect.getCornerPoints();
-    for(Square_Minimal s:squares){
-      if(s.getEdgePath().contains(cp[0].x,cp[0].y))return true;
-      if(s.getEdgePath().contains(cp[1].x,cp[1].y))return true;
-      if(s.getEdgePath().contains(cp[2].x,cp[2].y))return true;
-      if(s.getEdgePath().contains(cp[3].x,cp[3].y))return true;}
-    return false;}
   
   /*
    * for every cell in newsquare.skin
    * for every cell in the set of all cells in the edge of all extant squares : extantedges
    * where the 2 coincide, that's a raw prospect.
    */
-  private Set<Square_Minimal> getRawProspects(Set<Cell> extantedges,Square_Minimal newsquare){
+  private Set<Square_Minimal> getRawProspects(Square_PP_Abstract newsquare){
+    Set<Cell> extantedges=new HashSet<Cell>();
+    //get edges by name
+    for(Square_Minimal s:squares)
+      if(((Square_PP_Abstract)s).getName().equals(newsquare.getName()))
+      extantedges.addAll(s.getEdge());
+    //if that fails then just get edges
+    if(extantedges.isEmpty()){
+      for(Square_Minimal s:squares)
+        extantedges.addAll(s.getEdge());}
+    //
     List<Cell> newsquareskin=newsquare.getSkin();
     //
     Set<Square_Minimal> prospects=new HashSet<Square_Minimal>();
@@ -214,6 +218,106 @@ public class RModel{
         prospects.add(prospect);}}
     //
     return prospects;}
+  
+  class ProspectComparator implements Comparator<Square_Minimal>{
+    
+    ProspectComparator(Map<Square_Minimal,Double> ratings){
+      this.ratings=ratings;}
+    
+    Map<Square_Minimal,Double> ratings;
+
+    public int compare(
+      Square_Minimal a0,
+      Square_Minimal a1){
+      double 
+        r0=ratings.get(a0),
+        r1=ratings.get(a1);
+      if(r0==r1){
+        return 0;
+      }else if(r0<r1){
+        return 1;
+      }else{
+        return -1;}}}
+  
+  /*
+   * ################################
+   * RATE LOCATION PROSPECTS
+   * Rate prospects by
+   *   number of neighbors (number of alike-tagged neighbors TODO)
+   *   closeness to origin
+   *   closeness to clump ray
+   * ################################
+   */
+  
+  private Map<Square_Minimal,Double> rateProspects(Set<Square_Minimal> rawprospects,Square_PP_Abstract newsquare){
+    Map<Square_Minimal,Double> ratings=new HashMap<Square_Minimal,Double>();
+    double 
+      neighborcount,
+      closenesstoorigin,
+      closenesstoclumpangle,
+      rating;
+    for(Square_Minimal prospect:rawprospects){
+      neighborcount=getNeighborCount(prospect);
+      closenesstoorigin=getClosenessToOrigin(prospect);
+      closenesstoclumpangle=getClosenessToClumpAngle(prospect,newsquare);
+      rating=
+        neighborcount*SCALENEIGHBORCOUNT+
+        closenesstoorigin*CLOSENESSTOORIGINSCALE+
+        closenesstoclumpangle*CLOSENESSTOCLUMPANGLESCALE;
+      ratings.put(prospect,rating);}
+    return ratings;}
+  
+  static final double SCALENEIGHBORCOUNT=1.0;
+  
+  /*
+   * get set of all extant edges cells
+   * get set of prospect skin cells
+   * neighbor count is the overlap
+   */
+  double getNeighborCount(Square_Minimal prospect){
+    Set<Cell> extantedges=new HashSet<Cell>();
+    for(Square_Minimal s:squares)
+      extantedges.addAll(s.getEdge());
+    //
+    Set<Cell> testprospectskin=new HashSet<Cell>(prospect.getSkin()); 
+    //
+    testprospectskin.retainAll(extantedges);
+    return testprospectskin.size();}
+  
+  private static final double CLOSENESSTOORIGINSCALE=-1.0;
+  
+  /*
+   * test distance to all cell centers
+   * return closest
+   * negativize the value because smaller is better
+   */
+  double getClosenessToOrigin(Square_Minimal prospect){
+    List<Cell> cells=new ArrayList<Cell>(prospect.getCells());
+    Collections.sort(cells,new CellDistanceComparator());
+    return cells.get(0).getDistanceToOrigin();}
+  
+  class CellDistanceComparator implements Comparator<Cell>{
+
+    public int compare(Cell a0,Cell a1){
+      double 
+        d0=((Cell)a0).getDistanceToOrigin(),
+        d1=((Cell)a1).getDistanceToOrigin();
+      //
+      if(d0==d1){
+        return 0;
+      }else if(d0<d1){
+        return -1;
+      }else{
+        return 1;}}}
+  
+  private static final double CLOSENESSTOCLUMPANGLESCALE=-2.0;
+  
+  double getClosenessToClumpAngle(Square_Minimal prospect,Square_PP_Abstract newsquare){
+    double clumpangle=clumpangles.get(newsquare.getName());
+    DPoint center=prospect.getCenter();
+    double prospectangle=GD.getDirection_PointPoint(0,0,center.x,center.y);
+    double difference=GD.getAbsDeviation_2Directions(clumpangle,prospectangle);
+    return difference;}
   
   /*
    * ################################
