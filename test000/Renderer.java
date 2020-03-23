@@ -62,7 +62,7 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     
     //do transform
-    double dw=w,dh=h,scale=20;
+    double dw=w,dh=h,scale=40;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
     t.translate((dw/(2*scale)),(dh/(2*scale)));
@@ -74,18 +74,19 @@ public class Renderer{
       
   }
     
-  void renderSquarez(Graphics2D g,Square_PP_Abstract s){
-    Path2D.Double path=s.getEdgePath();
-    g.setPaint(s.getColor());
-    g.fill(path);
-    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
-    g.setStroke(t);
-    g.setPaint(Color.white);
-    g.draw(path);}
+//  void renderSquarez(Graphics2D g,Square_PP_Abstract s){
+//    Path2D.Double path=s.getEdgePath();
+//    g.setPaint(s.getColor());
+//    g.fill(path);
+//    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
+//    g.setStroke(t);
+//    g.setPaint(Color.white);
+//    g.draw(path);}
   
   void renderSquare(Graphics2D g,Square_PP_Abstract s){
     DPoint center=s.getCenter();
-    double span=s.span*s.getIntensity();
+    double intensity=s.getIntensity();
+    double span=s.span*intensity;
     double[][] c={
       {center.x-span/2,center.y-span/2},
       {center.x-span/2,center.y+span/2},
@@ -99,7 +100,10 @@ public class Renderer{
     path.lineTo(c[3][0],c[3][1]);
     path.closePath();
     //
-    g.setPaint(s.getColor());
+    Color color=s.getColor();
+    int alpha=(int)(intensity*255);
+    color=new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
+    g.setPaint(color);
     g.fill(path);
     Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
     g.setStroke(t);

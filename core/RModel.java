@@ -98,7 +98,7 @@ public class RModel{
         i.remove();}
     //
     int r;
-    if(squares.size()<8){
+    if(squares.size()<15){
       r=rnd.nextInt(3);
       if(r==0){
         addSquare(new Square_PP_Red(this,rnd.nextInt(3)+1));
