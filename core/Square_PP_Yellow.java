@@ -51,7 +51,7 @@ public class Square_PP_Yellow extends Square_PP_Abstract{
   
   public static final String NAME="Yellow";
   
-  public String getName(){
+  public String getType(){
     return NAME;
   }
 

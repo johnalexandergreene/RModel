@@ -31,6 +31,11 @@ public class Cell{
   private void initDistanceToOrigin(){
     distancetoorigin=getCenter().getDistance(0,0);}
   
+  public double getDistanceToPoint(DPoint p){
+    DPoint a=getCenter();
+    return p.getDistance(a);
+  }
+  
   /*
    * ################################
    * GEOMETRY

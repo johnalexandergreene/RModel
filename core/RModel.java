@@ -45,10 +45,20 @@ public class RModel{
    */
   
   public RModel(){
-    clumpangles.put(Square_PP_Red.NAME,0.0);
-    clumpangles.put(Square_PP_Yellow.NAME,GD.PI2/3);
-    clumpangles.put(Square_PP_Blue.NAME,(GD.PI2/3)*2);
+    double 
+      anglered=0.0,
+      angleyellow=GD.PI2/3,
+      angleblue=(GD.PI2/3)*2;
+    clumpangles.put(Square_PP_Red.NAME,anglered);
+    clumpangles.put(Square_PP_Yellow.NAME,angleyellow);
+    clumpangles.put(Square_PP_Blue.NAME,angleblue);
     
+    double[] a=GD.getPoint_PointDirectionInterval(0,0,anglered,3);
+    clumpcenters.put(Square_PP_Red.NAME,new DPoint(a));
+    a=GD.getPoint_PointDirectionInterval(0,0,angleyellow,3);
+    clumpcenters.put(Square_PP_Yellow.NAME,new DPoint(a));
+    a=GD.getPoint_PointDirectionInterval(0,0,angleblue,3);
+    clumpcenters.put(Square_PP_Blue.NAME,new DPoint(a));
   }
   
   /*
@@ -60,6 +70,8 @@ public class RModel{
   public static final double CELLSPAN=1.0;
   
   Map<String,Double> clumpangles=new HashMap<String,Double>();
+  
+  Map<String,DPoint> clumpcenters=new HashMap<String,DPoint>();
   
   /*
    * ################################
@@ -132,7 +144,8 @@ public class RModel{
    */
   public void addSquare(Square_PP_Abstract newsquare){
     if(squares.isEmpty()){ 
-      newsquare.setLocation(0,0);
+      DPoint cc=clumpcenters.get(newsquare.getType());
+      newsquare.setLocation((int)(cc.x-newsquare.span/2),(int)(cc.y-newsquare.span/2));
     }else{
       setLocationForNewSquare(newsquare);}
     //
@@ -197,7 +210,7 @@ public class RModel{
     Set<Cell> extantedges=new HashSet<Cell>();
     //get edges by name
     for(Square_Minimal s:squares)
-      if(((Square_PP_Abstract)s).getName().equals(newsquare.getName()))
+      if(((Square_PP_Abstract)s).getType().equals(newsquare.getType()))
       extantedges.addAll(s.getEdge());
     //if that fails then just get edges
     if(extantedges.isEmpty()){
@@ -258,7 +271,7 @@ public class RModel{
       rating;
     for(Square_Minimal prospect:rawprospects){
       neighborcount=getNeighborCount(prospect);
-      closenesstoorigin=getClosenessToOrigin(prospect);
+      closenesstoorigin=getClosenessToClumpPoint(prospect,newsquare);
       closenesstoclumpangle=getClosenessToClumpAngle(prospect,newsquare);
       rating=
         neighborcount*SCALENEIGHBORCOUNT+
@@ -291,17 +304,23 @@ public class RModel{
    * return closest
    * negativize the value because smaller is better
    */
-  double getClosenessToOrigin(Square_Minimal prospect){
+  double getClosenessToClumpPoint(Square_Minimal prospect,Square_PP_Abstract newsquare){
     List<Cell> cells=new ArrayList<Cell>(prospect.getCells());
-    Collections.sort(cells,new CellDistanceComparator());
-    return cells.get(0).getDistanceToOrigin();}
+    DPoint clumpcenter=clumpcenters.get(newsquare.getType());
+    Collections.sort(cells,new CellDistanceComparator(clumpcenter));
+    return cells.get(0).getDistanceToPoint(clumpcenter);}
   
   class CellDistanceComparator implements Comparator<Cell>{
+    
+    CellDistanceComparator(DPoint clumpcenter){
+      this.clumpcenter=clumpcenter;}
 
+    DPoint clumpcenter;
+    
     public int compare(Cell a0,Cell a1){
       double 
-        d0=((Cell)a0).getDistanceToOrigin(),
-        d1=((Cell)a1).getDistanceToOrigin();
+        d0=((Cell)a0).getDistanceToPoint(clumpcenter),
+        d1=((Cell)a1).getDistanceToPoint(clumpcenter);
       //
       if(d0==d1){
         return 0;
@@ -313,7 +332,7 @@ public class RModel{
   private static final double CLOSENESSTOCLUMPANGLESCALE=-2.0;
   
   double getClosenessToClumpAngle(Square_Minimal prospect,Square_PP_Abstract newsquare){
-    double clumpangle=clumpangles.get(newsquare.getName());
+    double clumpangle=clumpangles.get(newsquare.getType());
     DPoint center=prospect.getCenter();
     double prospectangle=GD.getDirection_PointPoint(0,0,center.x,center.y);
     double difference=GD.getAbsDeviation_2Directions(clumpangle,prospectangle);

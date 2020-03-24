@@ -57,7 +57,7 @@ public abstract class Square_PP_Abstract extends Square_Minimal{
    * printed on the icon 
    * used for type id too I suppose
    */
-  public abstract String getName();
+  public abstract String getType();
   
   /*
    * Used in the narrative stream 
