@@ -3,7 +3,7 @@ package org.fleen.rModel.core;
 import java.awt.Color;
 import java.util.Random;
 
-public class Square_PP_Yellow extends Square_PP_Abstract{
+public class Square_PP_Sight extends Square_PP_Abstract{
 
   /*
    * ################################
@@ -11,10 +11,10 @@ public class Square_PP_Yellow extends Square_PP_Abstract{
    * ################################
    */
   
-  public Square_PP_Yellow(RModel rmodel,int x,int y,int span){
+  public Square_PP_Sight(RModel rmodel,int x,int y,int span){
     super(rmodel,x,y,span);}
   
-  public Square_PP_Yellow(RModel rmodel,int span){
+  public Square_PP_Sight(RModel rmodel,int span){
     super(rmodel,span);
     Random rnd=new Random();
     maxage=rnd.nextInt(100)+30;}
@@ -33,8 +33,12 @@ public class Square_PP_Yellow extends Square_PP_Abstract{
   /*
    * ################################
    * RENDER
+   * Override this for specific phenomena
    * ################################
    */
+  
+  public static final String NAME="Sight";
+  public static final Color COLOR=new Color(251,174,213);
   
   public double getIntensity(){
     double 
@@ -47,16 +51,12 @@ public class Square_PP_Yellow extends Square_PP_Abstract{
     return 1.0;}
 
   public Color getColor(){
-    return Color.yellow;}
-  
-  public static final String NAME="Yellow";
+    return COLOR;}
   
   public String getType(){
-    return NAME;
-  }
+    return NAME;}
 
   public String getNarrative(){
-    return "A wild Yellow appears.";
-  }
+    return "Suddenly you see something.";}
 
 }

@@ -3,7 +3,7 @@ package org.fleen.rModel.core;
 import java.awt.Color;
 import java.util.Random;
 
-public class Square_PP_Red extends Square_PP_Abstract{
+public class Square_PP_Smell extends Square_PP_Abstract{
 
   /*
    * ################################
@@ -11,10 +11,10 @@ public class Square_PP_Red extends Square_PP_Abstract{
    * ################################
    */
   
-  public Square_PP_Red(RModel rmodel,int x,int y,int span){
+  public Square_PP_Smell(RModel rmodel,int x,int y,int span){
     super(rmodel,x,y,span);}
   
-  public Square_PP_Red(RModel rmodel,int span){
+  public Square_PP_Smell(RModel rmodel,int span){
     super(rmodel,span);
     Random rnd=new Random();
     maxage=rnd.nextInt(100)+30;}
@@ -33,8 +33,12 @@ public class Square_PP_Red extends Square_PP_Abstract{
   /*
    * ################################
    * RENDER
+   * Override this for specific phenomena
    * ################################
    */
+  
+  public static final String NAME="Smell";
+  public static final Color COLOR=new Color(249,220,52);
   
   public double getIntensity(){
     double 
@@ -47,16 +51,12 @@ public class Square_PP_Red extends Square_PP_Abstract{
     return 1.0;}
 
   public Color getColor(){
-    return Color.red;}
-  
-  public static final String NAME="Red";
+    return COLOR;}
   
   public String getType(){
-    return NAME;
-  }
+    return NAME;}
 
   public String getNarrative(){
-    return "A wild Red appears.";
-  }
+    return "Suddenly you smell something.";}
 
 }

@@ -36,37 +36,30 @@ import org.fleen.geom_2D.GD;
  * Each group of sense squares will build in a certain direction, constrained to an angle-section from the origin.
  *   
  */
-public class RModel{
+public class RModelOLD{
   
   /*
    * ################################
    * CONSTRUCTOR
-   * now we're gonna do it with 7 types
    * ################################
    */
   
-  public RModel(){
+  public RModelOLD(){
     double 
-      initoffset=rnd.nextDouble()*GD.PI2,
-      offset=GD.PI2/7;
-    double[] angles=new double[7];
-    for(int i=0;i<7;i++)
-      angles[i]=initoffset+offset*i;
-    //
-    String[] names=new String[7];
-    names[0]=Square_PP_Sight.NAME;
-    names[1]=Square_PP_Smell.NAME;
-    names[2]=Square_PP_Sound.NAME;
-    names[3]=Square_PP_Strange.NAME;
-    names[4]=Square_PP_Taste.NAME;
-    names[5]=Square_PP_Thought.NAME;
-    names[6]=Square_PP_Touch.NAME;
-    //
-    double[] a;
-    for(int i=0;i<7;i++){
-      clumpangles.put(names[i],angles[i]);
-      a=GD.getPoint_PointDirectionInterval(0,0,angles[i],2);
-      clumpcenters.put(names[i],new DPoint(a));}}
+      anglered=0.0,
+      angleyellow=GD.PI2/3,
+      angleblue=(GD.PI2/3)*2;
+    clumpangles.put(Square_PP_Sound.NAME,anglered);
+    clumpangles.put(Square_PP_Smell.NAME,angleyellow);
+    clumpangles.put(Square_PP_Sight.NAME,angleblue);
+    
+    double[] a=GD.getPoint_PointDirectionInterval(0,0,anglered,3);
+    clumpcenters.put(Square_PP_Sound.NAME,new DPoint(a));
+    a=GD.getPoint_PointDirectionInterval(0,0,angleyellow,3);
+    clumpcenters.put(Square_PP_Smell.NAME,new DPoint(a));
+    a=GD.getPoint_PointDirectionInterval(0,0,angleblue,3);
+    clumpcenters.put(Square_PP_Sight.NAME,new DPoint(a));
+  }
   
   /*
    * ################################
@@ -117,22 +110,14 @@ public class RModel{
         i.remove();}
     //
     int r;
-    if(squares.size()<8){
-      r=rnd.nextInt(7);
+    if(squares.size()<15){
+      r=rnd.nextInt(3);
       if(r==0){
-        addSquare(new Square_PP_Sight(this,rnd.nextInt(3)+1));
+        addSquare(new Square_PP_Sound(this,rnd.nextInt(3)+1));
       }else if(r==1){
         addSquare(new Square_PP_Smell(this,rnd.nextInt(3)+1));
-      }else if(r==2){
-        addSquare(new Square_PP_Sound(this,rnd.nextInt(3)+1));
-      }else if(r==3){
-        addSquare(new Square_PP_Strange(this,rnd.nextInt(3)+1));
-      }else if(r==4){
-        addSquare(new Square_PP_Taste(this,rnd.nextInt(3)+1));
-      }else if(r==5){
-        addSquare(new Square_PP_Thought(this,rnd.nextInt(3)+1));
       }else{
-        addSquare(new Square_PP_Touch(this,rnd.nextInt(3)+1));}}
+        addSquare(new Square_PP_Sight(this,rnd.nextInt(3)+1));}}
     //   
     observer.incrementedState();
     age++;}
