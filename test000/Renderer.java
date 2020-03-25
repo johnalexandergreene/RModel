@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.fleen.geom_2D.DPoint;
 import org.fleen.rModel.core.Square_Minimal;
-import org.fleen.rModel.core.Square_PP_Abstract;
+import org.fleen.rModel.core.Square_PerceptualPhenomenon_Abstract;
 
 public class Renderer{
   
@@ -68,9 +68,9 @@ public class Renderer{
     t.translate((dw/(2*scale)),(dh/(2*scale)));
     g.setTransform(t);
     //
-    for(Square_Minimal s:test.rmodel.squares)
-      if(s instanceof Square_PP_Abstract)
-        renderSquare(g,(Square_PP_Abstract)s);
+    for(Square_Minimal s:test.vignette.squares)
+      if(s instanceof Square_PerceptualPhenomenon_Abstract)
+        renderSquare(g,(Square_PerceptualPhenomenon_Abstract)s);
       
   }
     
@@ -83,10 +83,11 @@ public class Renderer{
 //    g.setPaint(Color.white);
 //    g.draw(path);}
   
-  void renderSquare(Graphics2D g,Square_PP_Abstract s){
+  void renderSquare(Graphics2D g,Square_PerceptualPhenomenon_Abstract s){
     DPoint center=s.getCenter();
     double intensity=s.getIntensity();
-    double span=s.span*intensity;
+    float strokewidth=(float)(2/g.getTransform().getScaleX());
+    double span=s.span*intensity-strokewidth;
     double[][] c={
       {center.x-span/2,center.y-span/2},
       {center.x-span/2,center.y+span/2},
@@ -105,10 +106,11 @@ public class Renderer{
     color=new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
     g.setPaint(color);
     g.fill(path);
-    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
-    g.setStroke(t);
-    g.setPaint(Color.white);
-    g.draw(path);}
+//    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
+//    g.setStroke(t);
+//    g.setPaint(Color.white);
+//    g.draw(path);
+    }
   
     
 //    //do transform

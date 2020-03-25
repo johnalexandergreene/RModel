@@ -33,33 +33,43 @@ import org.fleen.geom_2D.GD;
  * Fading in and out correspond to rise and fall in intensity.
  * Intensity corresponds to size and alpha.
  * 
- * Each group of sense squares will build in a certain direction, constrained to an angle-section from the origin.
+ * Each group of sense squares will build in a certain direction, 
+ * constrained to an angle-section from the origin, around a certain point.
+ * 
+ * Assume 30fps
  *   
  */
-public class RModelOLD{
+public class Vignette_AbstractOLD{
   
   /*
    * ################################
    * CONSTRUCTOR
+   * now we're gonna do it with 7 types
    * ################################
    */
   
-  public RModelOLD(){
+  public Vignette_AbstractOLD(){
     double 
-      anglered=0.0,
-      angleyellow=GD.PI2/3,
-      angleblue=(GD.PI2/3)*2;
-    clumpangles.put(Square_PP_Sound.NAME,anglered);
-    clumpangles.put(Square_PP_Smell.NAME,angleyellow);
-    clumpangles.put(Square_PP_Sight.NAME,angleblue);
-    
-    double[] a=GD.getPoint_PointDirectionInterval(0,0,anglered,3);
-    clumpcenters.put(Square_PP_Sound.NAME,new DPoint(a));
-    a=GD.getPoint_PointDirectionInterval(0,0,angleyellow,3);
-    clumpcenters.put(Square_PP_Smell.NAME,new DPoint(a));
-    a=GD.getPoint_PointDirectionInterval(0,0,angleblue,3);
-    clumpcenters.put(Square_PP_Sight.NAME,new DPoint(a));
-  }
+      initoffset=rnd.nextDouble()*GD.PI2,
+      offset=GD.PI2/7;
+    double[] angles=new double[7];
+    for(int i=0;i<7;i++)
+      angles[i]=initoffset+offset*i;
+    //
+    String[] names=new String[7];
+    names[0]=SPP_Sight.TYPE;
+    names[1]=SPP_Smell.TYPE;
+    names[2]=SPP_Sound.TYPE;
+    names[3]=SPP_Strange.TYPE;
+    names[4]=SPP_Taste.TYPE;
+    names[5]=SPP_Thought.TYPE;
+    names[6]=SPP_Touch.TYPE;
+    //
+    double[] a;
+    for(int i=0;i<7;i++){
+      clumpangles.put(names[i],angles[i]);
+      a=GD.getPoint_PointDirectionInterval(0,0,angles[i],2);
+      clumpcenters.put(names[i],new DPoint(a));}}
   
   /*
    * ################################
@@ -102,22 +112,30 @@ public class RModelOLD{
   
   public void advanceState(){
     //remove dead
-    Square_PP_Abstract square;
-    Iterator<Square_PP_Abstract> i=squares.iterator();
+    Square_PerceptualPhenomenon_Abstract square;
+    Iterator<Square_PerceptualPhenomenon_Abstract> i=squares.iterator();
     while(i.hasNext()){
       square=i.next();
       if(square.destroyMe())
         i.remove();}
     //
     int r;
-    if(squares.size()<15){
-      r=rnd.nextInt(3);
+    if(squares.size()<8){
+      r=rnd.nextInt(7);
       if(r==0){
-        addSquare(new Square_PP_Sound(this,rnd.nextInt(3)+1));
+        addSquare(new SPP_Sight(this,rnd.nextInt(3)+1));
       }else if(r==1){
-        addSquare(new Square_PP_Smell(this,rnd.nextInt(3)+1));
+        addSquare(new SPP_Smell(this,rnd.nextInt(3)+1));
+      }else if(r==2){
+        addSquare(new SPP_Sound(this,rnd.nextInt(3)+1));
+      }else if(r==3){
+        addSquare(new SPP_Strange(this,rnd.nextInt(3)+1));
+      }else if(r==4){
+        addSquare(new SPP_Taste(this,rnd.nextInt(3)+1));
+      }else if(r==5){
+        addSquare(new SPP_Thought(this,rnd.nextInt(3)+1));
       }else{
-        addSquare(new Square_PP_Sight(this,rnd.nextInt(3)+1));}}
+        addSquare(new SPP_Touch(this,rnd.nextInt(3)+1));}}
     //   
     observer.incrementedState();
     age++;}
@@ -129,7 +147,7 @@ public class RModelOLD{
    * ################################
    */
   
-  public RModelObserver observer;
+  public VignetteObserver observer;
   
   /*
    * ################################
@@ -137,12 +155,12 @@ public class RModelOLD{
    * ################################
    */
   
-  public List<Square_PP_Abstract> squares=new ArrayList<Square_PP_Abstract>();
+  public List<Square_PerceptualPhenomenon_Abstract> squares=new ArrayList<Square_PerceptualPhenomenon_Abstract>();
   
   /*
    * TODO make this work with type cone placement 
    */
-  public void addSquare(Square_PP_Abstract newsquare){
+  public void addSquare(Square_PerceptualPhenomenon_Abstract newsquare){
     if(squares.isEmpty()){ 
       DPoint cc=clumpcenters.get(newsquare.getType());
       newsquare.setLocation((int)(cc.x-newsquare.span/2),(int)(cc.y-newsquare.span/2));
@@ -166,7 +184,7 @@ public class RModelOLD{
    * ################################
    */
   
-  private void setLocationForNewSquare(Square_PP_Abstract newsquare){
+  private void setLocationForNewSquare(Square_PerceptualPhenomenon_Abstract newsquare){
     Set<Square_Minimal> rawprospects=getRawProspects(newsquare);
     cullCollisions(rawprospects);
     if(rawprospects.isEmpty())throw new IllegalArgumentException("no raw prospects");
@@ -206,11 +224,11 @@ public class RModelOLD{
    * for every cell in the set of all cells in the edge of all extant squares : extantedges
    * where the 2 coincide, that's a raw prospect.
    */
-  private Set<Square_Minimal> getRawProspects(Square_PP_Abstract newsquare){
+  private Set<Square_Minimal> getRawProspects(Square_PerceptualPhenomenon_Abstract newsquare){
     Set<Cell> extantedges=new HashSet<Cell>();
     //get edges by name
     for(Square_Minimal s:squares)
-      if(((Square_PP_Abstract)s).getType().equals(newsquare.getType()))
+      if(((Square_PerceptualPhenomenon_Abstract)s).getType().equals(newsquare.getType()))
       extantedges.addAll(s.getEdge());
     //if that fails then just get edges
     if(extantedges.isEmpty()){
@@ -262,7 +280,7 @@ public class RModelOLD{
    * ################################
    */
   
-  private Map<Square_Minimal,Double> rateProspects(Set<Square_Minimal> rawprospects,Square_PP_Abstract newsquare){
+  private Map<Square_Minimal,Double> rateProspects(Set<Square_Minimal> rawprospects,Square_PerceptualPhenomenon_Abstract newsquare){
     Map<Square_Minimal,Double> ratings=new HashMap<Square_Minimal,Double>();
     double 
       neighborcount,
@@ -304,7 +322,7 @@ public class RModelOLD{
    * return closest
    * negativize the value because smaller is better
    */
-  double getClosenessToClumpPoint(Square_Minimal prospect,Square_PP_Abstract newsquare){
+  double getClosenessToClumpPoint(Square_Minimal prospect,Square_PerceptualPhenomenon_Abstract newsquare){
     List<Cell> cells=new ArrayList<Cell>(prospect.getCells());
     DPoint clumpcenter=clumpcenters.get(newsquare.getType());
     Collections.sort(cells,new CellDistanceComparator(clumpcenter));
@@ -331,7 +349,7 @@ public class RModelOLD{
   
   private static final double CLOSENESSTOCLUMPANGLESCALE=-2.0;
   
-  double getClosenessToClumpAngle(Square_Minimal prospect,Square_PP_Abstract newsquare){
+  double getClosenessToClumpAngle(Square_Minimal prospect,Square_PerceptualPhenomenon_Abstract newsquare){
     double clumpangle=clumpangles.get(newsquare.getType());
     DPoint center=prospect.getCenter();
     double prospectangle=GD.getDirection_PointPoint(0,0,center.x,center.y);

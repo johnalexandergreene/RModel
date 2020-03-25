@@ -15,7 +15,7 @@ public class Square_Minimal{
    * ################################
    */
   
-  public Square_Minimal(RModel rmodel,int x,int y,int span){
+  public Square_Minimal(Vignette_Abstract rmodel,int x,int y,int span){
     this.rmodel=rmodel;
     this.x=x;
     this.y=y;
@@ -27,7 +27,7 @@ public class Square_Minimal{
    * ################################
    */
   
-  RModel rmodel;
+  Vignette_Abstract rmodel;
   
   /*
    * ################################
@@ -49,10 +49,10 @@ public class Square_Minimal{
   //sw,nw,ne,se
   public DPoint[] getCornerPoints(){
     DPoint[] cp=new DPoint[4];
-    cp[0]=new DPoint(x*RModel.CELLSPAN,y*RModel.CELLSPAN);
-    cp[1]=new DPoint(x*RModel.CELLSPAN,y*RModel.CELLSPAN+span*RModel.CELLSPAN);
-    cp[2]=new DPoint(x*RModel.CELLSPAN+span*RModel.CELLSPAN,y*RModel.CELLSPAN+span*RModel.CELLSPAN);
-    cp[3]=new DPoint(x*RModel.CELLSPAN+span*RModel.CELLSPAN,y*RModel.CELLSPAN);
+    cp[0]=new DPoint(x,y);
+    cp[1]=new DPoint(x,y+span);
+    cp[2]=new DPoint(x+span,y+span);
+    cp[3]=new DPoint(x+span,y);
     return cp;}
   
   Path2D.Double edgepath=null;

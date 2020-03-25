@@ -25,7 +25,7 @@ public class Exporter{
   private static final int DPI=300;
   
   public void export(){
-    File file=getExportFile(test.exportdir,test.rmodel.age);
+    File file=getExportFile(test.exportdir,test.vignette.age);
     write(test.getImageForExport(),file);}
   
   private File getExportFile(File exportdir,int index){

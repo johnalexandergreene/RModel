@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.fleen.geom_2D.DPoint;
@@ -33,71 +32,30 @@ import org.fleen.geom_2D.GD;
  * Fading in and out correspond to rise and fall in intensity.
  * Intensity corresponds to size and alpha.
  * 
- * Each group of sense squares will build in a certain direction, constrained to an angle-section from the origin.
+ * Each group of sense squares will build in a certain direction, 
+ * constrained to an angle-section from the origin, around a certain point.
+ * 
+ * Assume 30fps
  *   
  */
-public class RModel{
+public abstract class Vignette_Abstract{
   
   /*
    * ################################
    * CONSTRUCTOR
-   * now we're gonna do it with 7 types
    * ################################
    */
   
-  public RModel(){
-    double 
-      initoffset=rnd.nextDouble()*GD.PI2,
-      offset=GD.PI2/7;
-    double[] angles=new double[7];
-    for(int i=0;i<7;i++)
-      angles[i]=initoffset+offset*i;
-    //
-    String[] names=new String[7];
-    names[0]=Square_PP_Sight.NAME;
-    names[1]=Square_PP_Smell.NAME;
-    names[2]=Square_PP_Sound.NAME;
-    names[3]=Square_PP_Strange.NAME;
-    names[4]=Square_PP_Taste.NAME;
-    names[5]=Square_PP_Thought.NAME;
-    names[6]=Square_PP_Touch.NAME;
-    //
-    double[] a;
-    for(int i=0;i<7;i++){
-      clumpangles.put(names[i],angles[i]);
-      a=GD.getPoint_PointDirectionInterval(0,0,angles[i],2);
-      clumpcenters.put(names[i],new DPoint(a));}}
+  public Vignette_Abstract(){
+    initClumpAnglesAndCenters();}
   
   /*
    * ################################
-   * GEOMETRY
+   * OBSERVER
    * ################################
    */
   
-  public static final double CELLSPAN=1.0;
-  
-  Map<String,Double> clumpangles=new HashMap<String,Double>();
-  
-  Map<String,DPoint> clumpcenters=new HashMap<String,DPoint>();
-  
-  /*
-   * ################################
-   * VIEW
-   * ################################
-   */
-  
-  public DPoint viewcenter=new DPoint(0,0);
-  
-  public double scale=40;
-  
-//  void setViewCenter(PDisk disk){
-////    viewcenter=disk.getCenter().getDPoint();
-//    }
-//  
-//  void setViewCenter(List<PDisk> disks){
-//    //TODO
-//    //centroid or whatever
-//    }
+  public VignetteObserver observer;
   
   /*
    * ################################
@@ -107,44 +65,24 @@ public class RModel{
   
   public int age=0;
   
+  /*
+   * TODO
+   * override and extend this
+   * add ppsquare creation logic for directing the vignette
+   * super.advanceState should probably come after the directing logic
+   */
   public void advanceState(){
     //remove dead
-    Square_PP_Abstract square;
-    Iterator<Square_PP_Abstract> i=squares.iterator();
+    Square_PerceptualPhenomenon_Abstract square;
+    Iterator<Square_PerceptualPhenomenon_Abstract> i=squares.iterator();
     while(i.hasNext()){
       square=i.next();
       if(square.destroyMe())
         i.remove();}
-    //
-    int r;
-    if(squares.size()<8){
-      r=rnd.nextInt(7);
-      if(r==0){
-        addSquare(new Square_PP_Sight(this,rnd.nextInt(3)+1));
-      }else if(r==1){
-        addSquare(new Square_PP_Smell(this,rnd.nextInt(3)+1));
-      }else if(r==2){
-        addSquare(new Square_PP_Sound(this,rnd.nextInt(3)+1));
-      }else if(r==3){
-        addSquare(new Square_PP_Strange(this,rnd.nextInt(3)+1));
-      }else if(r==4){
-        addSquare(new Square_PP_Taste(this,rnd.nextInt(3)+1));
-      }else if(r==5){
-        addSquare(new Square_PP_Thought(this,rnd.nextInt(3)+1));
-      }else{
-        addSquare(new Square_PP_Touch(this,rnd.nextInt(3)+1));}}
-    //   
+    //report to observer
     observer.incrementedState();
+    //increment age
     age++;}
-  
-  
-  /*
-   * ################################
-   * OBSERVER
-   * ################################
-   */
-  
-  public RModelObserver observer;
   
   /*
    * ################################
@@ -152,12 +90,9 @@ public class RModel{
    * ################################
    */
   
-  public List<Square_PP_Abstract> squares=new ArrayList<Square_PP_Abstract>();
+  public List<Square_PerceptualPhenomenon_Abstract> squares=new ArrayList<Square_PerceptualPhenomenon_Abstract>();
   
-  /*
-   * TODO make this work with type cone placement 
-   */
-  public void addSquare(Square_PP_Abstract newsquare){
+  public void addSquare(Square_PerceptualPhenomenon_Abstract newsquare){
     if(squares.isEmpty()){ 
       DPoint cc=clumpcenters.get(newsquare.getType());
       newsquare.setLocation((int)(cc.x-newsquare.span/2),(int)(cc.y-newsquare.span/2));
@@ -165,6 +100,19 @@ public class RModel{
       setLocationForNewSquare(newsquare);}
     //
     squares.add(newsquare);}
+  
+  /*
+   * ################################
+   * CLUMP ANGLES AND CENTERS
+   * Used for placing squares and arranging clumps of squares
+   * ################################
+   */
+  
+  protected Map<String,Double> clumpangles=new HashMap<String,Double>();
+  
+  protected Map<String,DPoint> clumpcenters=new HashMap<String,DPoint>();
+  
+  protected abstract void initClumpAnglesAndCenters();
  
   /*
    * ################################
@@ -181,7 +129,7 @@ public class RModel{
    * ################################
    */
   
-  private void setLocationForNewSquare(Square_PP_Abstract newsquare){
+  private void setLocationForNewSquare(Square_PerceptualPhenomenon_Abstract newsquare){
     Set<Square_Minimal> rawprospects=getRawProspects(newsquare);
     cullCollisions(rawprospects);
     if(rawprospects.isEmpty())throw new IllegalArgumentException("no raw prospects");
@@ -221,11 +169,11 @@ public class RModel{
    * for every cell in the set of all cells in the edge of all extant squares : extantedges
    * where the 2 coincide, that's a raw prospect.
    */
-  private Set<Square_Minimal> getRawProspects(Square_PP_Abstract newsquare){
+  private Set<Square_Minimal> getRawProspects(Square_PerceptualPhenomenon_Abstract newsquare){
     Set<Cell> extantedges=new HashSet<Cell>();
     //get edges by name
     for(Square_Minimal s:squares)
-      if(((Square_PP_Abstract)s).getType().equals(newsquare.getType()))
+      if(((Square_PerceptualPhenomenon_Abstract)s).getType().equals(newsquare.getType()))
       extantedges.addAll(s.getEdge());
     //if that fails then just get edges
     if(extantedges.isEmpty()){
@@ -277,7 +225,7 @@ public class RModel{
    * ################################
    */
   
-  private Map<Square_Minimal,Double> rateProspects(Set<Square_Minimal> rawprospects,Square_PP_Abstract newsquare){
+  private Map<Square_Minimal,Double> rateProspects(Set<Square_Minimal> rawprospects,Square_PerceptualPhenomenon_Abstract newsquare){
     Map<Square_Minimal,Double> ratings=new HashMap<Square_Minimal,Double>();
     double 
       neighborcount,
@@ -319,7 +267,7 @@ public class RModel{
    * return closest
    * negativize the value because smaller is better
    */
-  double getClosenessToClumpPoint(Square_Minimal prospect,Square_PP_Abstract newsquare){
+  double getClosenessToClumpPoint(Square_Minimal prospect,Square_PerceptualPhenomenon_Abstract newsquare){
     List<Cell> cells=new ArrayList<Cell>(prospect.getCells());
     DPoint clumpcenter=clumpcenters.get(newsquare.getType());
     Collections.sort(cells,new CellDistanceComparator(clumpcenter));
@@ -346,7 +294,7 @@ public class RModel{
   
   private static final double CLOSENESSTOCLUMPANGLESCALE=-2.0;
   
-  double getClosenessToClumpAngle(Square_Minimal prospect,Square_PP_Abstract newsquare){
+  double getClosenessToClumpAngle(Square_Minimal prospect,Square_PerceptualPhenomenon_Abstract newsquare){
     double clumpangle=clumpangles.get(newsquare.getType());
     DPoint center=prospect.getCenter();
     double prospectangle=GD.getDirection_PointPoint(0,0,center.x,center.y);
@@ -360,17 +308,9 @@ public class RModel{
    */
   
   public String toString(){
-    StringBuffer a=new StringBuffer("RMODEL");
+    StringBuffer a=new StringBuffer("VIGNETTE");
     a.append("\n scount : "+squares.size());
     a.append("\n age : "+age);
     return a.toString();}
-  
-  /*
-   * ################################
-   * UTIL
-   * ################################
-   */
-  
-  private Random rnd=new Random();
 
 }

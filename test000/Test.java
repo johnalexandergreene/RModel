@@ -5,8 +5,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-import org.fleen.rModel.core.RModel;
-import org.fleen.rModel.core.RModelObserver;
+import org.fleen.rModel.abstractStinkyDog.VIG_AbstractStinkyDog;
+import org.fleen.rModel.core.VignetteObserver;
+import org.fleen.rModel.core.Vignette_Abstract;
 
 public class Test{
   
@@ -17,8 +18,8 @@ public class Test{
    */
   
   Test(){
-    rmodel=new RModel();
-    rmodel.observer=observer;
+    vignette=new VIG_AbstractStinkyDog();
+    vignette.observer=observer;
     ui=new UI(this);
     renderer=new Renderer(this);
     exporter=new Exporter(this);}
@@ -29,12 +30,12 @@ public class Test{
    * ################################
    */
   
-  RModelObserver observer=new RModelObserver(){
+  VignetteObserver observer=new VignetteObserver(){
     public void incrementedState(){
       System.out.println("incremented state");
       renderer.render();
       ui.repaint();
-      exporter.export();
+//      exporter.export();
       }};
       
   /*
@@ -64,7 +65,7 @@ public class Test{
    * ################################
    */
   
-  RModel rmodel;
+  Vignette_Abstract vignette;
   UI ui; 
   Renderer renderer;
   
@@ -83,7 +84,7 @@ public class Test{
   public static final void main(String[] a){
     Test test=new Test();
     for(int i=0;i<FRAMECOUNT;i++){
-      test.rmodel.advanceState();
+      test.vignette.advanceState();
      try{
       Thread.sleep(100);
      }catch(Exception x){};}}

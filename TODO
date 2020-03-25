@@ -13,5 +13,15 @@ in it we'll have
   
 and it's implement comparable (by rating) 
 
+---
+
+RENDERER
+Do it in pure integer
+square growth = 1, 2 or 3 lines per frame (?)
+padding = 2 
+square image span = scaleinteger * cellspan
+? or maybe not
+  
+
 
 

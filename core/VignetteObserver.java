@@ -1,6 +1,6 @@
 package org.fleen.rModel.core;
 
-public interface RModelObserver{
+public interface VignetteObserver{
   
   void incrementedState();
 
