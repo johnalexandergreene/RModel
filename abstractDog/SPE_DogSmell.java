@@ -1,11 +1,11 @@
-package org.fleen.rModel.abstractStinkyDog;
+package org.fleen.rModel.abstractDog;
 
 import java.util.Random;
 
-import org.fleen.rModel.core.SPP_Sound;
-import org.fleen.rModel.core.Vignette_Abstract;
+import org.fleen.rModel.core.SPE_Smell;
+import org.fleen.rModel.core.Vignette;
 
-public class SPP_DogSmell extends SPP_Sound{
+public class SPE_DogSmell extends SPE_Smell{
 
   /*
    * ################################
@@ -13,10 +13,10 @@ public class SPP_DogSmell extends SPP_Sound{
    * ################################
    */
   
-  public SPP_DogSmell(Vignette_Abstract rmodel,int x,int y,int span){
+  public SPE_DogSmell(Vignette rmodel,int x,int y,int span){
     super(rmodel,x,y,span);}
   
-  public SPP_DogSmell(Vignette_Abstract rmodel,int span){
+  public SPE_DogSmell(Vignette rmodel,int span){
     super(rmodel,span);}
 
   /*

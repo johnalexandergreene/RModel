@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.fleen.geom_2D.DPoint;
 import org.fleen.rModel.core.Square_Minimal;
-import org.fleen.rModel.core.Square_PerceptualPhenomenon_Abstract;
+import org.fleen.rModel.core.Square_PerceptualEvent_Abstract;
 
 public class Renderer{
   
@@ -46,7 +46,7 @@ public class Renderer{
   
   BufferedImage image;
   
-  public static final Color BACKGROUNDCOLOR=new Color(255,255,255);
+  public static final Color BACKGROUNDCOLOR=new Color(0,0,0);
   
   static final int DEFAULT_VIEWPORT_SPAN=600;
   
@@ -62,15 +62,15 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     
     //do transform
-    double dw=w,dh=h,scale=40;
+    double dw=w,dh=h,scale=20;
     AffineTransform t=new AffineTransform();
     t.scale(scale,scale);
     t.translate((dw/(2*scale)),(dh/(2*scale)));
     g.setTransform(t);
     //
     for(Square_Minimal s:test.vignette.squares)
-      if(s instanceof Square_PerceptualPhenomenon_Abstract)
-        renderSquare(g,(Square_PerceptualPhenomenon_Abstract)s);
+      if(s instanceof Square_PerceptualEvent_Abstract)
+        renderSquare(g,(Square_PerceptualEvent_Abstract)s);
       
   }
     
@@ -83,7 +83,7 @@ public class Renderer{
 //    g.setPaint(Color.white);
 //    g.draw(path);}
   
-  void renderSquare(Graphics2D g,Square_PerceptualPhenomenon_Abstract s){
+  void renderSquare(Graphics2D g,Square_PerceptualEvent_Abstract s){
     DPoint center=s.getCenter();
     double intensity=s.getIntensity();
     float strokewidth=(float)(2/g.getTransform().getScaleX());

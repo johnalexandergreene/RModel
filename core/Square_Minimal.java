@@ -15,7 +15,7 @@ public class Square_Minimal{
    * ################################
    */
   
-  public Square_Minimal(Vignette_Abstract rmodel,int x,int y,int span){
+  public Square_Minimal(Vignette rmodel,int x,int y,int span){
     this.rmodel=rmodel;
     this.x=x;
     this.y=y;
@@ -27,7 +27,7 @@ public class Square_Minimal{
    * ################################
    */
   
-  Vignette_Abstract rmodel;
+  Vignette rmodel;
   
   /*
    * ################################

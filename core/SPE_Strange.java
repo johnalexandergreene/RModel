@@ -2,7 +2,7 @@ package org.fleen.rModel.core;
 
 import java.awt.Color;
 
-public abstract class SPP_Strange extends Square_PerceptualPhenomenon_Abstract{
+public abstract class SPE_Strange extends Square_PerceptualEvent_Abstract{
 
   /*
    * ################################
@@ -10,10 +10,10 @@ public abstract class SPP_Strange extends Square_PerceptualPhenomenon_Abstract{
    * ################################
    */
   
-  public SPP_Strange(Vignette_Abstract vignette,int x,int y,int span){
+  public SPE_Strange(Vignette vignette,int x,int y,int span){
     super(vignette,x,y,span);}
   
-  public SPP_Strange(Vignette_Abstract vignette,int span){
+  public SPE_Strange(Vignette vignette,int span){
     super(vignette,span);}
 
   /*

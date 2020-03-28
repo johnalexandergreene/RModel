@@ -2,7 +2,7 @@ package org.fleen.rModel.core;
 
 import java.awt.Color;
 
-public abstract class SPP_Smell extends Square_PerceptualPhenomenon_Abstract{
+public abstract class SPE_Thought extends Square_PerceptualEvent_Abstract{
 
   /*
    * ################################
@@ -10,11 +10,11 @@ public abstract class SPP_Smell extends Square_PerceptualPhenomenon_Abstract{
    * ################################
    */
   
-  public SPP_Smell(Vignette_Abstract rmodel,int x,int y,int span){
-    super(rmodel,x,y,span);}
+  public SPE_Thought(Vignette vignette,int x,int y,int span){
+    super(vignette,x,y,span);}
   
-  public SPP_Smell(Vignette_Abstract rmodel,int span){
-    super(rmodel,span);}
+  public SPE_Thought(Vignette vignette,int span){
+    super(vignette,span);}
 
   /*
    * ################################
@@ -22,13 +22,13 @@ public abstract class SPP_Smell extends Square_PerceptualPhenomenon_Abstract{
    * ################################
    */
   
-  public static final String TYPE="Smell";
-  public static final Color COLOR=new Color(249,220,52);
+  public static final String TYPE="Thought";
+  public static final Color COLOR=new Color(30,157,231);
   
   public String getType(){
     return TYPE;}
   
   public Color getColor(){
     return COLOR;}
-  
+
 }

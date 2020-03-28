@@ -2,7 +2,7 @@ package org.fleen.rModel.core;
 
 import java.awt.Color;
 
-public abstract class SPP_Sound extends Square_PerceptualPhenomenon_Abstract{
+public abstract class SPE_Sound extends Square_PerceptualEvent_Abstract{
 
   /*
    * ################################
@@ -10,10 +10,10 @@ public abstract class SPP_Sound extends Square_PerceptualPhenomenon_Abstract{
    * ################################
    */
   
-  public SPP_Sound(Vignette_Abstract rmodel,int x,int y,int span){
+  public SPE_Sound(Vignette rmodel,int x,int y,int span){
     super(rmodel,x,y,span);}
   
-  public SPP_Sound(Vignette_Abstract rmodel,int span){
+  public SPE_Sound(Vignette rmodel,int span){
     super(rmodel,span);}
 
   /*

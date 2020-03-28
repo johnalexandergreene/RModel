@@ -2,7 +2,7 @@ package org.fleen.rModel.core;
 
 import java.awt.Color;
 
-public abstract class Square_PerceptualPhenomenon_Abstract extends Square_Minimal{
+public abstract class Square_PerceptualEvent_Abstract extends Square_Minimal{
 
   /*
    * ################################
@@ -10,11 +10,11 @@ public abstract class Square_PerceptualPhenomenon_Abstract extends Square_Minima
    * ################################
    */
   
-  public Square_PerceptualPhenomenon_Abstract(Vignette_Abstract rmodel,int x,int y,int span){
+  public Square_PerceptualEvent_Abstract(Vignette rmodel,int x,int y,int span){
     super(rmodel,x,y,span);
     birthday=rmodel.age;}
   
-  public Square_PerceptualPhenomenon_Abstract(Vignette_Abstract rmodel,int span){
+  public Square_PerceptualEvent_Abstract(Vignette rmodel,int span){
     this(rmodel,0,0,span);}
   
   /*
