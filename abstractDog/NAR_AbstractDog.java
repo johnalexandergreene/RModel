@@ -25,7 +25,7 @@ public class NAR_AbstractDog implements Narrative{
     //
     Random rnd=new Random();
     int z=rnd.nextInt(VIG_AbstractDog.PETYPES.length);
-    if(vignette.squares.size()<12){
+    if(vignette.squares.size()<33){
       if(z==0){
         vignette.addSquare(new SPE_DogBark(vignette,rnd.nextInt(3)+1));
       }else if(z==1){

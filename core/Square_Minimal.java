@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fleen.geom_2D.DPoint;
-import org.fleen.geom_2D.GD;
 
 public class Square_Minimal{
   
@@ -40,6 +39,9 @@ public class Square_Minimal{
   //height and width of the square, in cells
   public int span;
   
+  /*
+   * in terms of the coors of the SW corner cell
+   */
   public void setLocation(int x,int y){
     this.x=x;
     this.y=y;
@@ -53,6 +55,18 @@ public class Square_Minimal{
     cp[1]=new DPoint(x,y+span);
     cp[2]=new DPoint(x+span,y+span);
     cp[3]=new DPoint(x+span,y);
+    return cp;}
+  
+  public DPoint[] getCornerPoints(double padding){
+    DPoint[] cp=new DPoint[4];
+    double 
+      dx=x,
+      dy=y,
+      ds=span;
+    cp[0]=new DPoint(dx+padding,dy+padding);
+    cp[1]=new DPoint(dx+padding,dy+ds-padding);
+    cp[2]=new DPoint(dx+ds-padding,dy+ds-padding);
+    cp[3]=new DPoint(dx+ds-padding,dy+padding);
     return cp;}
   
   Path2D.Double edgepath=null;
@@ -72,9 +86,11 @@ public class Square_Minimal{
     edgepath.closePath();}
   
   public DPoint getCenter(){
-    DPoint[] c=getCornerPoints();
-    double[] a=GD.getPoint_Mid2Points(c[0].x,c[0].y,c[2].x,c[2].y);
-    return new DPoint(a);}
+    DPoint[] cp=getCornerPoints();
+    double 
+      cx=(cp[0].x+cp[2].x)/2,
+      cy=(cp[0].y+cp[2].y)/2;
+    return new DPoint(cx,cy);}
   
   /*
    * ################################

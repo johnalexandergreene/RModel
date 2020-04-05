@@ -8,6 +8,8 @@ import java.io.File;
 import org.fleen.rModel.abstractDog.VIG_AbstractDog;
 import org.fleen.rModel.core.Vignette;
 import org.fleen.rModel.core.VignetteObserver;
+import org.fleen.rModel.util.Exporter;
+import org.fleen.rModel.util.UI;
 
 public class Test{
   
@@ -21,7 +23,7 @@ public class Test{
     vignette=new VIG_AbstractDog();
     vignette.observer=observer;
     ui=new UI(this);
-    renderer=new Renderer(this);
+    renderer=new Renderer_Test(this);
     exporter=new Exporter(this);}
   
   /*
@@ -65,9 +67,9 @@ public class Test{
    * ################################
    */
   
-  Vignette vignette;
+  public Vignette vignette;
   UI ui; 
-  Renderer renderer;
+  public Renderer_Test renderer;
   
   /*
    * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -1,20 +1,18 @@
 package org.fleen.rModel.test000;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.util.HashMap;
 
-import org.fleen.geom_2D.DPoint;
 import org.fleen.rModel.core.Square_Minimal;
 import org.fleen.rModel.core.Square_PerceptualEvent_Abstract;
 
-public class Renderer{
+public class Renderer_Test{
   
   //RENDERING HINTS
   
@@ -39,14 +37,14 @@ public class Renderer{
   
   //
   
-  Renderer(Test test){
+  Renderer_Test(Test test){
     this.test=test;}
   
   Test test;
   
-  BufferedImage image;
+  public BufferedImage image;
   
-  public static final Color BACKGROUNDCOLOR=new Color(0,0,0);
+  public static final Color BACKGROUNDCOLOR=new Color(255,255,255);
   
   static final int DEFAULT_VIEWPORT_SPAN=600;
   
@@ -62,55 +60,80 @@ public class Renderer{
     g.fillRect(0,0,w,h);
     
     //do transform
-    double dw=w,dh=h,scale=20;
-    AffineTransform t=new AffineTransform();
-    t.scale(scale,scale);
-    t.translate((dw/(2*scale)),(dh/(2*scale)));
-    g.setTransform(t);
+//    double dw=w,dh=h,scale=20;
+//    AffineTransform t=new AffineTransform();
+//    t.scale(scale,scale);
+//    t.translate((dw/(2*scale)),(dh/(2*scale)));
+//    g.setTransform(t);
     //
     for(Square_Minimal s:test.vignette.squares)
       if(s instanceof Square_PerceptualEvent_Abstract)
         renderSquare(g,(Square_PerceptualEvent_Abstract)s);
       
   }
-    
-//  void renderSquarez(Graphics2D g,Square_PP_Abstract s){
-//    Path2D.Double path=s.getEdgePath();
-//    g.setPaint(s.getColor());
-//    g.fill(path);
-//    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
-//    g.setStroke(t);
-//    g.setPaint(Color.white);
-//    g.draw(path);}
+  
+  static final double PADDING=2;
+  
   
   void renderSquare(Graphics2D g,Square_PerceptualEvent_Abstract s){
-    DPoint center=s.getCenter();
-    double intensity=s.getIntensity();
-    float strokewidth=(float)(2/g.getTransform().getScaleX());
-    double span=s.span*intensity-strokewidth;
-    double[][] c={
-      {center.x-span/2,center.y-span/2},
-      {center.x-span/2,center.y+span/2},
-      {center.x+span/2,center.y+span/2},
-      {center.x+span/2,center.y-span/2}};
-    //
-    Path2D.Double path=new Path2D.Double();
-    path.moveTo(c[0][0],c[0][1]);
-    path.lineTo(c[1][0],c[1][1]);
-    path.lineTo(c[2][0],c[2][1]);
-    path.lineTo(c[3][0],c[3][1]);
-    path.closePath();
-    //
-    Color color=s.getColor();
-    int alpha=(int)(intensity*255);
-    color=new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
-    g.setPaint(color);
-    g.fill(path);
-//    Stroke t=new BasicStroke((float)(2/g.getTransform().getScaleX()));
-//    g.setStroke(t);
-//    g.setPaint(Color.white);
-//    g.draw(path);
-    }
+    int
+      scale=30,
+      offsetx=image.getWidth()/2,
+      offsety=image.getHeight()/2;
+    g.setPaint(s.getColor());
+    int padding=(int)(scale*(1.0-s.getIntensity())*s.span/2)+2;
+    g.fillRect(
+      offsetx+(scale*s.x)+padding,
+      offsety+(scale*s.y)+padding,
+      (scale*s.span)-padding*2,
+      (scale*s.span)-padding*2);
+    
+    
+//    Kernel kernel = new Kernel(3, 3,
+//        
+//        new float[] {
+//       
+//      1f/9f, 1f/9f, 1f/9f,
+//       
+//      1f/9f, 1f/9f, 1f/9f,
+//       
+//      1f/9f, 1f/9f, 1f/9f});
+//       
+//        BufferedImageOp op = new ConvolveOp(kernel);
+//       
+//        image = op.filter(image, null);
+    
+    
+    
+  }
+  
+//  void renderSquare(Graphics2D g,Square_PerceptualEvent_Abstract s){
+//    DPoint center=s.getCenter();
+//    double intensity=s.getIntensity();
+//    double scaledpadding=PADDING/g.getTransform().getScaleX();
+////    double scaledpadding=PADDING;
+//    double span=s.span*intensity-scaledpadding;
+//    double[][] c={
+//      {center.x-span/2,center.y-span/2},
+//      {center.x-span/2,center.y+span/2},
+//      {center.x+span/2,center.y+span/2},
+//      {center.x+span/2,center.y-span/2}};
+//    //
+//    Path2D.Double path=new Path2D.Double();
+//    path.moveTo(c[0][0],c[0][1]);
+//    path.lineTo(c[1][0],c[1][1]);
+//    path.lineTo(c[2][0],c[2][1]);
+//    path.lineTo(c[3][0],c[3][1]);
+//    path.closePath();
+//    //
+//    Color color=s.getColor();
+//    int alpha=(int)(intensity*255);
+//    color=new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
+//    g.setPaint(color);
+//    g.fill(path);
+//    
+//    
+//  }
   
     
 //    //do transform

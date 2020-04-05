@@ -1,6 +1,8 @@
-package org.fleen.rModel.test000;
+package org.fleen.rModel.util;
 
 import javax.swing.JFrame;
+
+import org.fleen.rModel.test000.Test;
 
 public class UI extends JFrame{
   

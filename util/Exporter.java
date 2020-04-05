@@ -1,4 +1,4 @@
-package org.fleen.rModel.test000;
+package org.fleen.rModel.util;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
+
+import org.fleen.rModel.test000.Test;
 
 import com.sun.imageio.plugins.png.PNGMetadata;
 
