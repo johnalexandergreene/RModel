@@ -1,15 +1,15 @@
 package org.fleen.rModel.test000;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.util.HashMap;
 
-import org.fleen.rModel.core.Square_Minimal;
+import org.fleen.rModel.core.PPHex;
 import org.fleen.rModel.core.Square_PerceptualEvent_Abstract;
 
 public class Renderer_Test{
@@ -60,15 +60,22 @@ public class Renderer_Test{
     g.fillRect(0,0,w,h);
     
     //do transform
-//    double dw=w,dh=h,scale=20;
-//    AffineTransform t=new AffineTransform();
-//    t.scale(scale,scale);
-//    t.translate((dw/(2*scale)),(dh/(2*scale)));
-//    g.setTransform(t);
+    double dw=w,dh=h,scale=33;
+    AffineTransform t=new AffineTransform();
+    t.scale(scale,scale);
+    t.translate((dw/(2*scale)),(dh/(2*scale)));
+    g.setTransform(t);
     //
-    for(Square_Minimal s:test.vignette.squares)
-      if(s instanceof Square_PerceptualEvent_Abstract)
-        renderSquare(g,(Square_PerceptualEvent_Abstract)s);
+    g.setPaint(new Color(166,166,166));
+    g.setStroke(new BasicStroke(((float)0.06)));
+    Path2D.Double path;
+    for(PPHex hex:test.vignette.pphexagons){
+      System.out.println("rendering hexagon");
+      path=hex.getPath2D(0.93);
+      
+      g.fill(path);
+      
+    }
       
   }
   

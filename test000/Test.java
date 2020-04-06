@@ -5,7 +5,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-import org.fleen.rModel.abstractDog.VIG_AbstractDog;
 import org.fleen.rModel.core.Vignette;
 import org.fleen.rModel.core.VignetteObserver;
 import org.fleen.rModel.util.Exporter;
@@ -20,7 +19,7 @@ public class Test{
    */
   
   Test(){
-    vignette=new VIG_AbstractDog();
+    vignette=new Vignette(1);
     vignette.observer=observer;
     ui=new UI(this);
     renderer=new Renderer_Test(this);
@@ -34,7 +33,6 @@ public class Test{
   
   VignetteObserver observer=new VignetteObserver(){
     public void advancedState(){
-      System.out.println("incremented state");
       renderer.render();
       ui.repaint();
 //      exporter.export();
@@ -88,7 +86,7 @@ public class Test{
     for(int i=0;i<FRAMECOUNT;i++){
       test.vignette.advanceState();
      try{
-      Thread.sleep(100);
+      Thread.sleep(300);
      }catch(Exception x){};}}
     
 }

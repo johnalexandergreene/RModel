@@ -15,48 +15,31 @@ import org.fleen.geom_2D.DPoint;
 import org.fleen.geom_2D.GD;
 
 /*
- * Vignette
- * A model of reality. A bunch of sounds, sights, smells, thoughts (call them Perceptual Phenomena) etc dancing around.
- * 
- * A hex grid. Colored hexagons representing Perceptual Phenomena. 
- * Colored by type (sight, sound, smell, thought...). Faded by intensity (very pastel to bold high satch) 
- * 
- * We have a bunch of perceptual phenomena arriving, manifesting and leaving. 
- * That is
- * A hexagon fades in. White-to-pastel-to-bold.
- * Hangs out for the duration of its manifestation. Maybe it throbs a bit.
- * Then it departs. Slow or fast according to its (the perceptual phenomen's) nature.
- * 
- * a bunch of hexagonal icons representing perceptual phenomena
+ * reality model
+ * a bunch of square icons representing perceptual phenomena
  * taken together, as a pattern, represents a whole river perceptual phenomena. Ie reality.
  * 
- * We will have a simple narrative text stream beneath the hexagon animation. 
- * "The dog barks". "The pumpkin reeks". "You think about oranges".
+ * So we have these perceptual phenomenon squares : class PPSquare
+ * A PPSquare appears somewhere in the perspective. 
+ *   It's appears. A colored square. 
+ *   It fades in, persists, fades out. The duration of the fading is arbitrary, rresembling the phenomenon somewhat.
+ *     (Example 1 : a "dog bark" will fade-zoom in quicky, persist for a moment, and immediately fade-zoom out.)
+ *     (Example 2 : a "Car sound" will slowly fade-zoom in, persist for a mement, and then slowly fade-zoom out.)
+ *   It will have a name, or an initial.
+ *   It will have a color corresponding to sight, sound, thought etc.
+ * Another PPSquare may appear, then another.
+ * PPSquares will group by sense.
+ * PPSquare size corresponds to intensity.
+ * Fading in and out correspond to rise and fall in intensity.
+ * Intensity corresponds to size and alpha.
  * 
- * ---
- * 
- * Vignette is a pattern of Perceptual Phenomena. Governed by some associated logic.
- * The pattern is rendered as the bunch of hexagons and the narrative
- * 
- * So we have hexagons. 
- * We create class PerceptualPhenomenonHexagon objects
- * Create. Add to list. Remove from list when appropriate.
- * throw Strings at the narrative scroller.
- * Keep doing that for a number of cycles. Incrementally export video frames. 
+ * Each group of sense squares will build in a certain direction, 
+ * constrained to an angle-section from the origin, around a certain point.
  * 
  * Assume 30fps
- * 
- * Hexagon placement is a thing we do. PPHex geometry.
- * Hex0 goes in the center.
- * get growth cone for hex0
- * hex1 goes next to hex0
- * and so on.
- * Constrain growth to growth cones. Cones of growth-restriction, 1 for each type
- * try to keep the types nicely grouped into descreetish clumps.
- * adjacent but distinct.
  *   
  */
-public class Vignette{
+public class VignetteOLD{
   
   /*
    * ################################
@@ -64,119 +47,10 @@ public class Vignette{
    * ################################
    */
   
-  public Vignette(Narrative narrative,String[] petypes){
+  public VignetteOLD(Narrative narrative,String[] petypes){
     this.narrative=narrative;
     narrative.setVignette(this);
     initClumpAnglesAndCenters(petypes);}
-  
-  /*
-   * we specify the number of perceptual phenomena types expected.
-   * 7 is our usual number. seven "senses"
-   * sight,sound,touch,smell,thought,taste,strange(undefined)  
-   * 
-   */
-  public Vignette(int typecount){
-    initTypeGrowthDirections(typecount);}
-  
-  /*
-   * ################################
-   * PPHEX GROWTH VECTORS
-   * For each pphex type we have a growth vector
-   * this is a direction from the center in which that type builds hexagons
-   * ################################
-   */
-  
-  public int pphextypecount;
-  private List<Double> rawpphextypegrowthdirections;
-  
-  private void initTypeGrowthDirections(int typecount){
-    pphextypecount=typecount;
-    rawpphextypegrowthdirections=new ArrayList<Double>(typecount);
-    Random r=new Random();
-    double 
-      d=r.nextDouble()*GD.PI2,
-      angularinterval=GD.PI2/((double)typecount);
-    for(int i=0;i<typecount;i++){
-      d+=((double)i)*angularinterval;
-      d=GD.normalizeDirection(d);
-      rawpphextypegrowthdirections.add(d);}}
-  
-  /*
-   * lazy init growth directions by PPHex type name
-   * for rando PPHex type. 
-   * If it's your first time then init direction from the list of raws at random
-   */
-  
-  HashMap<String,Double> dirbyname=new HashMap<String,Double>();
-  
-  public double getGrowthDirection(PPHex pphex){
-    Double d=dirbyname.get(pphex.getTypeName());
-    if(d==null){
-      Random r=new Random();
-      int i=r.nextInt(rawpphextypegrowthdirections.size());
-      d=rawpphextypegrowthdirections.remove(i);
-      dirbyname.put(pphex.getTypeName(),d);}
-    return d;}
-   
-  /*
-   * ################################
-   * PERCEPTUAL PHENOMENON HEXAGONS
-   * ################################
-   */
-  
-  public Set<PPHex> pphexagons=new HashSet<PPHex>();
-  
-  /*
-   * the big question is where to put it
-   * 
-   * if there are no hexes then put the new one in the center
-   * if there is one then put then new one next to it
-   * calculate growth cones too 
-   */
-  public void addPPHex(PPHex newpphex){
-    //even if we don't use it we want to initialize it.
-    double growthdir=getGrowthDirection(newpphex);
-    System.out.println("growthdir="+growthdir);
-    //if there aren't any then put it in the center
-    if(pphexagons.isEmpty()){
-      newpphex.setCoor(0,0);
-      pphexagons.add(newpphex);
-    }else{
-      PPHex placement=getPlacementForNewPPHex(newpphex,growthdir);
-      newpphex.setCoor(placement.coora,placement.coorb);
-      pphexagons.add(newpphex);}}
-  
-  /*
-   * ################################
-   * PPHEX PLACEMENT
-   * get all possible
-   * remove any already occupied
-   * rate prospective placements by 
-   *   # of similar neighbors
-   *   closeness to growth angle
-   * sort by rating
-   * return the top rated
-   * ################################
-   */
-  
-  PPHex getPlacementForNewPPHex(PPHex newpphex,double growthdir){
-    //get all possible
-    Set<PPHex> prospects=new HashSet<PPHex>();
-    for(PPHex hex:pphexagons)
-      prospects.addAll(hex.getNeighbors());
-    //cull extant
-    for(PPHex hex:pphexagons){
-      prospects.remove(hex);
-    }
-    
-    //TEST
-    List<PPHex> foo=new ArrayList<PPHex>(prospects);
-    Random r=new Random();
-    return foo.get(r.nextInt(foo.size()));
-    
-    
-  }
-  
   
   /*
    * ################################
@@ -209,15 +83,9 @@ public class Vignette{
    * super.advanceState should probably come after the directing logic
    */
   public void advanceState(){
-    System.out.println("advanced state");
-//    narrative.advanceState();
+    narrative.advanceState();
     //report to observer
-    
-    //TEST
-    addPPHex(new PPHex());
-    
     observer.advancedState();
-    
     //increment age
     age++;}
   

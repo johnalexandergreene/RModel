@@ -33,6 +33,40 @@ weaker=pasteller, unto white for no intensity (intensity over the ambient, that 
 
 This intensity-rendering works graphically fine for fading-in-out sounds and such too.
 
+PLACEMENT
+
+Each type of perceptual event hexagon (PEH) groys within a cone projecting outward from the center.
+
+Like this
+
+first PEH (peh0) is placed in the center
+growth cone for peh0 is specified . 
+Direction=random
+Span = 2PI/totalnumberofpehtypes
+
+second (peh1) is placed at arbitrary one of the six faces of the first PEH
+third.
+if it is of different type from peh0 then geometrically appropriate growth cone is selected, within set of pieslices 
+implied by the first peh.
+
+third (peh2) is placed, either grouping or establshing new slice
+
+and so on
+
+#############
+awareness (Light!)
+
+Use metaballs
+enclose single events and groups of events
+draw metaball edge
+sharp/fuzzy... 
+
+
+
+
+
+
+
 
 
 
